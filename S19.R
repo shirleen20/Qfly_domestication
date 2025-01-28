@@ -138,7 +138,7 @@ DF <- DF1 %>%
 
 # Import standards data
 
-df.old <- read_csv("MS1Standards/Table_ConcAllStandards.csv") %>% # this is data from 1st run
+df.old <- read_csv("data/Table_ConcAllStandards.csv") %>% # this is data from 1st run
   dplyr::select(Name, Class, area, Conc, Batch) %>%
   dplyr::filter(Class != "Cer" & Class != "FA" & Class != "SM" & Class != "PCp") %>% 
   dplyr::group_by(Name, Class, Conc, Batch) %>% 

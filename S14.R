@@ -137,7 +137,7 @@ DF <- DF1 %>%
 
 # Import standards data
 
-df.old <- read_csv("MS1Standards/Table_ConcAllStandards.csv") %>% # this is data from 1st run
+df.old <- read_csv("data/Table_ConcAllStandards.csv") %>% # this is data from 1st run
   dplyr::select(Name, Class, area, Conc, Batch) %>%
   dplyr::filter(Class != "Cer" & Class != "FA" & Class != "SM" & Class != "PCp") %>% 
   dplyr::group_by(Name, Class, Conc, Batch) %>% 
@@ -256,7 +256,7 @@ Abundance.global.1Dayplot.ELNL <- Abundance.global.1Day.ELNL %>%
   theme(axis.title.x =element_blank()) + theme(axis.title.y =element_blank()) + theme(axis.text.x =element_blank()) +
   scale_colour_manual(values = c("ct" = "red", "cbr" = "green", "syd" = "blue", "s06" = "blue")) 
 
-ggsave(plot = Abundance.global.1Dayplot.ELNL, width = 50, height = 30, units = "mm", dpi = 300,filename = "ScriptManuscript2/Figures/Figure4/AB_ELNLglobalD1.jpg")                
+#ggsave(plot = Abundance.global.1Dayplot.ELNL, width = 50, height = 30, units = "mm", dpi = 300,filename = "ScriptManuscript2/Figures/Figure4/AB_ELNLglobalD1.jpg")                
 
 #_____Day 1 ELPL_____________
 
@@ -286,7 +286,7 @@ Abundance.global.1Dayplot.ELPL <- Abundance.global.1Day.ELPL %>%
   theme(axis.title.x =element_blank()) + theme(axis.title.y =element_blank()) + theme(axis.text.x =element_blank()) +
   scale_colour_manual(values = c("ct" = "red", "cbr" = "green", "syd" = "blue", "s06" = "blue")) 
 
-ggsave(plot = Abundance.global.1Dayplot.ELPL, width = 50, height = 30, units = "mm", dpi = 300,filename = "ScriptManuscript2/Figures/Figure5/AB_ELPLglobalD1.jpg")                
+#ggsave(plot = Abundance.global.1Dayplot.ELPL, width = 50, height = 30, units = "mm", dpi = 300,filename = "ScriptManuscript2/Figures/Figure5/AB_ELPLglobalD1.jpg")                
 
 #_____________________________Day 19 _______________________________
 
@@ -350,7 +350,7 @@ Abundance.global.19Dayplot.ELPL <- Abundance.global.19Day.ELPL %>%
   scale_colour_manual(values = c("ct" = "red", "cbr" = "green", "syd" = "blue", "s06" = "blue")) 
 
 
-ggsave(plot = Abundance.global.19Dayplot.ELPL, width = 50, height = 30, units = "mm", dpi = 300,filename = "ScriptManuscript2/Figures/Figure5/AB_ELPLglobalD19.jpg")                
+#ggsave(plot = Abundance.global.19Dayplot.ELPL, width = 50, height = 30, units = "mm", dpi = 300,filename = "ScriptManuscript2/Figures/Figure5/AB_ELPLglobalD19.jpg")                
 
 #________________________________________________________________________________________________________________
 
@@ -474,7 +474,7 @@ AlkylCC.global.1Dayplot.ELNL <- AlkylCC.global.1Day.ELNL %>%
   theme(axis.title.x =element_blank()) + theme(axis.title.y =element_blank()) + theme(axis.text.x =element_blank()) +
   scale_colour_manual(values = c("ct" = "red", "cbr" = "green", "syd" = "blue", "s06" = "blue"))
 
-ggsave(plot = AlkylCC.global.1Dayplot.ELNL, width = 50, height = 30, units = "mm", dpi = 300,filename = "ScriptManuscript2/Figures/Figure4/CC_AlkylchainELNLglobalD1.jpg")
+#ggsave(plot = AlkylCC.global.1Dayplot.ELNL, width = 50, height = 30, units = "mm", dpi = 300,filename = "ScriptManuscript2/Figures/Figure4/CC_AlkylchainELNLglobalD1.jpg")
 
 #___Day 1 AcylCC ELNLs______
 
@@ -531,7 +531,7 @@ AcylCC.global.1Dayplot.ELNL <- AcylCC.global.1Day.ELNL %>%
   theme(axis.title.x =element_blank()) + theme(axis.title.y =element_blank()) + theme(axis.text.x =element_blank()) +
   scale_colour_manual(values = c("ct" = "red", "cbr" = "green", "syd" = "blue", "s06" = "blue"))
 
-ggsave(plot = AcylCC.global.1Dayplot.ELNL, width = 50, height = 30, units = "mm", dpi = 300,filename = "ScriptManuscript2/Figures/Figure4/CC_AcylchainELNLglobalD1.jpg")
+#ggsave(plot = AcylCC.global.1Dayplot.ELNL, width = 50, height = 30, units = "mm", dpi = 300,filename = "ScriptManuscript2/Figures/Figure4/CC_AcylchainELNLglobalD1.jpg")
 
 
 #___Day 1 AcylCC ELPLs______
@@ -563,7 +563,7 @@ AcylCC.global.1Dayplot.ELPL <- AcylCC.global.1Day.ELPL %>%
   scale_colour_manual(values = c("ct" = "red", "cbr" = "green", "syd" = "blue", "s06" = "blue"))
 
 
-ggsave(plot = AcylCC.global.1Dayplot.ELPL, width = 50, height = 30, units = "mm", dpi = 300,filename = "ScriptManuscript2/Figures/Figure5/CC_AcylchainELPLglobalD1.jpg")
+#ggsave(plot = AcylCC.global.1Dayplot.ELPL, width = 50, height = 30, units = "mm", dpi = 300,filename = "ScriptManuscript2/Figures/Figure5/CC_AcylchainELPLglobalD1.jpg")
 
 #________________________Day 19_______________________________
 
@@ -626,7 +626,7 @@ AlkylCC.global.19Dayplot.ELNL <- AlkylCC.global.19Day.ELNL %>%
   theme(axis.title.x =element_blank()) + theme(axis.title.y =element_blank()) + theme(axis.text.x =element_blank()) +
   scale_colour_manual(values = c("ct" = "red", "cbr" = "green", "syd" = "blue", "s06" = "blue"))
 
-ggsave(plot = AlkylCC.global.19Dayplot.ELNL, width = 50, height = 30, units = "mm", dpi = 300,filename = "ScriptManuscript2/Figures/Figure4/CC_AlkylchainELNLglobalD19.jpg")
+#ggsave(plot = AlkylCC.global.19Dayplot.ELNL, width = 50, height = 30, units = "mm", dpi = 300,filename = "ScriptManuscript2/Figures/Figure4/CC_AlkylchainELNLglobalD19.jpg")
 
 #______
 
@@ -655,7 +655,7 @@ AlkylCC.bottom.19Dayplot.ELNL <- AlkylCC.bottom.19Day.ELNL %>%
   theme(axis.title.x =element_blank()) + theme(axis.title.y =element_blank()) + theme(axis.text.x =element_blank()) +
   scale_colour_manual(values = c("ct" = "red", "cbr" = "green", "syd" = "blue", "s06" = "blue"))
 
-ggsave(plot = AlkylCC.bottom.19Dayplot.ELNL, width = 50, height = 30, units = "mm", dpi = 300,filename = "ScriptManuscript2/Figures/Figure4/CC_AlkylchainELNLbottomD19.jpg")
+#ggsave(plot = AlkylCC.bottom.19Dayplot.ELNL, width = 50, height = 30, units = "mm", dpi = 300,filename = "ScriptManuscript2/Figures/Figure4/CC_AlkylchainELNLbottomD19.jpg")
 
 #______
 
@@ -684,7 +684,7 @@ AlkylCC.top.19Dayplot.ELNL <- AlkylCC.top.19Day.ELNL %>%
   theme(axis.title.x =element_blank()) + theme(axis.title.y =element_blank()) + theme(axis.text.x =element_blank()) +
   scale_colour_manual(values = c("ct" = "red", "cbr" = "green", "syd" = "blue", "s06" = "blue"))
 
-ggsave(plot = AlkylCC.top.19Dayplot.ELNL, width = 50, height = 30, units = "mm", dpi = 300,filename = "ScriptManuscript2/Figures/Figure4/CC_AlkylchainELNLtopD19.jpg")
+#ggsave(plot = AlkylCC.top.19Dayplot.ELNL, width = 50, height = 30, units = "mm", dpi = 300,filename = "ScriptManuscript2/Figures/Figure4/CC_AlkylchainELNLtopD19.jpg")
 
 
 #_________Day 19 AcylCC___________
@@ -741,7 +741,7 @@ AcylCC.global.19Dayplot.ELNL <- AcylCC.global.19Day.ELNL %>%
   theme(axis.title.x =element_blank()) + theme(axis.title.y =element_blank()) + theme(axis.text.x =element_blank()) +
   scale_colour_manual(values = c("ct" = "red", "cbr" = "green", "syd" = "blue", "s06" = "blue"))
 
-ggsave(plot = AcylCC.global.19Dayplot.ELNL, width = 50, height = 30, units = "mm", dpi = 300,filename = "ScriptManuscript2/Figures/Figure4/CC_AcylchainELNLglobalD19.jpg")
+#ggsave(plot = AcylCC.global.19Dayplot.ELNL, width = 50, height = 30, units = "mm", dpi = 300,filename = "ScriptManuscript2/Figures/Figure4/CC_AcylchainELNLglobalD19.jpg")
 
 #______
 
@@ -770,7 +770,7 @@ AcylCC.bottom.19Dayplot.ELNL <- AcylCC.bottom.19Day.ELNL %>%
   theme(axis.title.x =element_blank()) + theme(axis.title.y =element_blank()) + theme(axis.text.x =element_blank()) +
   scale_colour_manual(values = c("ct" = "red", "cbr" = "green", "syd" = "blue", "s06" = "blue"))
 
-ggsave(plot = AcylCC.bottom.19Dayplot.ELNL, width = 50, height = 30, units = "mm", dpi = 300,filename = "ScriptManuscript2/Figures/Figure4/CC_AcylchainELNLbottomD19.jpg")
+#ggsave(plot = AcylCC.bottom.19Dayplot.ELNL, width = 50, height = 30, units = "mm", dpi = 300,filename = "ScriptManuscript2/Figures/Figure4/CC_AcylchainELNLbottomD19.jpg")
 
 #______
 
@@ -799,7 +799,7 @@ AcylCC.top.19Dayplot.ELNL <- AcylCC.top.19Day.ELNL %>%
   theme(axis.title.x =element_blank()) + theme(axis.title.y =element_blank()) + theme(axis.text.x =element_blank()) +
   scale_colour_manual(values = c("ct" = "red", "cbr" = "green", "syd" = "blue", "s06" = "blue"))
 
-ggsave(plot = AcylCC.top.19Dayplot.ELNL, width = 50, height = 30, units = "mm", dpi = 300,filename = "ScriptManuscript2/Figures/Figure4/CC_AcylchainELNLtopD19.jpg")
+#ggsave(plot = AcylCC.top.19Dayplot.ELNL, width = 50, height = 30, units = "mm", dpi = 300,filename = "ScriptManuscript2/Figures/Figure4/CC_AcylchainELNLtopD19.jpg")
 
 #__________________________________________________________________________________________________________
 
@@ -863,7 +863,7 @@ AlkylDB.global.1Dayplot.ELNL <- AlkylDB.global.1Day.ELNL %>%
   theme(axis.title.x =element_blank()) + theme(axis.title.y =element_blank()) + theme(axis.text.x =element_blank()) +
   scale_colour_manual(values = c("ct" = "red", "cbr" = "green", "syd" = "blue", "s06" = "blue"))
 
-ggsave(plot = AlkylDB.global.1Dayplot.ELNL, width = 50, height = 30, units = "mm", dpi = 300,filename = "ScriptManuscript2/Figures/Figure4/DB_AlkylchainELNLglobalD1.jpg")
+#ggsave(plot = AlkylDB.global.1Dayplot.ELNL, width = 50, height = 30, units = "mm", dpi = 300,filename = "ScriptManuscript2/Figures/Figure4/DB_AlkylchainELNLglobalD1.jpg")
 
 #_____
 
@@ -892,7 +892,7 @@ AlkylDB.bottom.1Dayplot.ELNL <- AlkylDB.bottom.1Day.ELNL %>%
   theme(axis.title.x =element_blank()) + theme(axis.title.y =element_blank()) + theme(axis.text.x =element_blank()) +
   scale_colour_manual(values = c("ct" = "red", "cbr" = "green", "syd" = "blue", "s06" = "blue"))
 
-ggsave(plot = AlkylDB.bottom.1Dayplot.ELNL, width = 50, height = 30, units = "mm", dpi = 300,filename = "ScriptManuscript2/Figures/Figure4/DB_AlkylchainELNLbottomD1.jpg")
+#ggsave(plot = AlkylDB.bottom.1Dayplot.ELNL, width = 50, height = 30, units = "mm", dpi = 300,filename = "ScriptManuscript2/Figures/Figure4/DB_AlkylchainELNLbottomD1.jpg")
 
 #______
 
@@ -921,7 +921,7 @@ AlkylDB.top.1Dayplot.ELNL <- AlkylDB.top.1Day.ELNL %>%
   theme(axis.title.x =element_blank()) + theme(axis.title.y =element_blank()) + theme(axis.text.x =element_blank()) +
   scale_colour_manual(values = c("ct" = "red", "cbr" = "green", "syd" = "blue", "s06" = "blue"))
 
-ggsave(plot = AlkylDB.top.1Dayplot.ELNL, width = 50, height = 30, units = "mm", dpi = 300,filename = "ScriptManuscript2/Figures/Figure4/DB_AlkylchainELNLtopD1.jpg")
+#ggsave(plot = AlkylDB.top.1Dayplot.ELNL, width = 50, height = 30, units = "mm", dpi = 300,filename = "ScriptManuscript2/Figures/Figure4/DB_AlkylchainELNLtopD1.jpg")
 
 #______________________________________
 

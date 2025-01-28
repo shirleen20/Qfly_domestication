@@ -136,7 +136,7 @@ DF <- DF1 %>%
 
 # Import standards data
 
-df.old <- read_csv("MS1Standards/Table_ConcAllStandards.csv") %>% # this is data from 1st run
+df.old <- read_csv("data/Table_ConcAllStandards.csv") %>% # this is data from 1st run
   dplyr::select(Name, Class, area, Conc, Batch) %>%
   dplyr::filter(Class != "Cer" & Class != "FA" & Class != "SM" & Class != "PCp") %>% 
   dplyr::group_by(Name, Class, Conc, Batch) %>% 
@@ -237,7 +237,7 @@ Abundance.global.1Dayplot.TG <- Abundance.global.1Day %>%
   scale_colour_manual(values = c("ct" = "red", "cbr" = "green", "syd" = "blue", "s06" = "blue")) 
 
 
-ggsave(plot = Abundance.global.1Dayplot.TG, width = 50, height = 30, units = "mm", dpi = 300,filename = "ScriptManuscript2/Figures/Figure2/AB_TGglobalD1.jpg")                
+#ggsave(plot = Abundance.global.1Dayplot.TG, width = 50, height = 30, units = "mm", dpi = 300,filename = "ScriptManuscript2/Figures/Figure2/AB_TGglobalD1.jpg")                
 
 #___________________________Variable: Mean carbon chain length analysis_________________________
 
@@ -362,7 +362,7 @@ CC.global.1Dayplot.TG <- CC.global.1Day.TG %>%
   theme(axis.title.x =element_blank()) + theme(axis.title.y =element_blank()) + theme(axis.text.x =element_blank()) +
   scale_colour_manual(values = c("ct" = "red", "cbr" = "green", "syd" = "blue", "s06" = "blue"))  
 
-ggsave(plot = CC.global.1Dayplot.TG, width = 50, height = 30, units = "mm", dpi = 300,filename = "ScriptManuscript2/Figures/Figure2/CC_TGglobalD1.jpg")                
+#ggsave(plot = CC.global.1Dayplot.TG, width = 50, height = 30, units = "mm", dpi = 300,filename = "ScriptManuscript2/Figures/Figure2/CC_TGglobalD1.jpg")                
 
 
 #_______DG Day 1 CC use full model and three weights______
@@ -392,7 +392,7 @@ CC.global.1Dayplot.DG  <- CC.global.1Day.DG  %>%
   theme(axis.title.x =element_blank()) + theme(axis.title.y =element_blank()) + theme(axis.text.x =element_blank()) +
   scale_colour_manual(values = c("ct" = "red", "cbr" = "green", "syd" = "blue", "s06" = "blue"))  
 
-ggsave(plot = CC.global.1Dayplot.DG, width = 50, height = 30, units = "mm", dpi = 300,filename = "ScriptManuscript2/Figures/Figure2/CC_DGglobalD1.jpg")                
+#ggsave(plot = CC.global.1Dayplot.DG, width = 50, height = 30, units = "mm", dpi = 300,filename = "ScriptManuscript2/Figures/Figure2/CC_DGglobalD1.jpg")                
 
 #___ 
 
@@ -421,7 +421,7 @@ CC.bottom.1Dayplot.DG  <- CC.bottom.1Day.DG  %>%
   theme(axis.title.x =element_blank()) + theme(axis.title.y =element_blank()) + theme(axis.text.x =element_blank()) +
   scale_colour_manual(values = c("ct" = "red", "cbr" = "green", "syd" = "blue", "s06" = "blue")) 
 
-ggsave(plot = CC.bottom.1Dayplot.DG, width = 50, height = 30, units = "mm", dpi = 300,filename = "ScriptManuscript2/Figures/Figure2/CC_DGbottomD1.jpg")                
+#ggsave(plot = CC.bottom.1Dayplot.DG, width = 50, height = 30, units = "mm", dpi = 300,filename = "ScriptManuscript2/Figures/Figure2/CC_DGbottomD1.jpg")                
 
 #___
 CC.top.1Day.DG  <- DF_glm02_1 %>% 
@@ -449,7 +449,7 @@ CC.top.1Dayplot.DG  <- CC.top.1Day.DG  %>%
   theme(axis.title.x =element_blank()) + theme(axis.title.y =element_blank()) + theme(axis.text.x =element_blank()) +
   scale_colour_manual(values = c("ct" = "red", "cbr" = "green", "syd" = "blue", "s06" = "blue")) 
 
-ggsave(plot = CC.top.1Dayplot.DG, width = 50, height = 30, units = "mm", dpi = 300,filename = "ScriptManuscript2/Figures/Figure2/CC_DGtopD1.jpg")                
+#ggsave(plot = CC.top.1Dayplot.DG, width = 50, height = 30, units = "mm", dpi = 300,filename = "ScriptManuscript2/Figures/Figure2/CC_DGtopD1.jpg")                
 
 #___________________________Variable: Mean double bond content analysis_________________________
 

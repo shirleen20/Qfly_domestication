@@ -21,7 +21,7 @@ rm(list=ls())
 
 #__________
 
-CTnewAbundance <- as.data.frame(read_csv("ScriptManuscript2/MainTables/CTnew_commonacylchains.csv")) %>% 
+CTnewAbundance <- as.data.frame(read_csv("data/data_plot/CTnew_commonacylchains.csv")) %>% 
   dplyr::mutate(Age = paste0(Age, " Day")) %>% 
   tidyr::unite(AcylChain, Age, Class, remove = TRUE) %>% 
   dplyr::rename(PercentageAbundance = ct_New) %>% 
@@ -100,7 +100,7 @@ p1.Legend <- CTnewAbundance %>%
 
 #__________ SDolder heatmap_________
 
-SD0lderAbundance <- as.data.frame(read_csv("ScriptManuscript2/MainTables/SD0lder_commonacylchains.csv")) %>% 
+SD0lderAbundance <- as.data.frame(read_csv("data/data_plot/SD0lder_commonacylchains.csv")) %>% 
   dplyr::mutate(Age = paste0(Age, " Day")) %>% 
   tidyr::unite(AcylChain, Age, Class, remove = TRUE) %>% 
   dplyr::rename(PercentageAbundance = s06_Older) %>% 

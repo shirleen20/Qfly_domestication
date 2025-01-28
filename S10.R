@@ -259,7 +259,7 @@ Abundance.global.1Dayplot.NL <- Abundance.global.1Day %>%
   theme(axis.title.x =element_blank()) + theme(axis.title.y =element_blank()) + theme(axis.text.x =element_blank()) +
   scale_colour_manual(values = c("ct" = "red", "cbr" = "green", "syd" = "blue", "s06" = "blue")) 
 
-ggsave(plot = Abundance.global.1Dayplot.NL, width = 50, height = 30, units = "mm", dpi = 300,filename = "ScriptManuscript2/Figures/Figure2/AB_NLglobalD1.jpg")                
+#ggsave(plot = Abundance.global.1Dayplot.NL, width = 50, height = 30, units = "mm", dpi = 300,filename = "ScriptManuscript2/Figures/Figure2/AB_NLglobalD1.jpg")                
 
 #_____________________________Day 19 _______________________________
 
@@ -321,7 +321,7 @@ Abundance.global.19Dayplot.NL <- Abundance.global.19Day %>%
   theme(axis.title.x =element_blank()) + theme(axis.title.y =element_blank()) + theme(axis.text.x =element_blank()) +
   scale_colour_manual(values = c("ct" = "red", "cbr" = "green", "syd" = "blue", "s06" = "blue")) 
 
-ggsave(plot = Abundance.global.19Dayplot.NL, width = 50, height = 30, units = "mm", dpi = 300,filename = "ScriptManuscript2/Figures/Figure2/AB_NLglobalD19.jpg")
+#ggsave(plot = Abundance.global.19Dayplot.NL, width = 50, height = 30, units = "mm", dpi = 300,filename = "ScriptManuscript2/Figures/Figure2/AB_NLglobalD19.jpg")
 
 #________________________________________________________________________________________________________________
 
@@ -448,7 +448,7 @@ CC.global.1Dayplot.NL <- CC.global.1Day.NL %>%
   theme(axis.title.x =element_blank()) + theme(axis.title.y =element_blank()) + theme(axis.text.x =element_blank()) +
   scale_colour_manual(values = c("ct" = "red", "cbr" = "green", "syd" = "blue", "s06" = "blue")) 
 
-ggsave(plot = CC.global.1Dayplot.NL, width = 50, height = 30, units = "mm", dpi = 300,filename = "ScriptManuscript2/Figures/Figure2/CC_NLglobalD1.jpg")
+#ggsave(plot = CC.global.1Dayplot.NL, width = 50, height = 30, units = "mm", dpi = 300,filename = "ScriptManuscript2/Figures/Figure2/CC_NLglobalD1.jpg")
 
 #__________________________________________________________________________________________________
 

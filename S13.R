@@ -136,7 +136,7 @@ DF <- DF1 %>%
 
 # Import standards data
 
-df.old <- read_csv("MS1Standards/Table_ConcAllStandards.csv") %>% # this is data from 1st run
+df.old <- read_csv("data/Table_ConcAllStandards.csv") %>% # this is data from 1st run
   dplyr::select(Name, Class, area, Conc, Batch) %>%
   dplyr::filter(Class != "Cer" & Class != "FA" & Class != "SM" & Class != "PCp") %>% 
   dplyr::group_by(Name, Class, Conc, Batch) %>% 
@@ -224,7 +224,7 @@ PEPC.global.1Dayplot <- PEPC.global.1Day %>%
   theme(axis.title.x =element_blank()) + theme(axis.title.y =element_blank()) + theme(axis.text.x =element_blank()) +
   scale_colour_manual(values = c("ct" = "red", "cbr" = "green", "syd" = "blue", "s06" = "blue"))  
 
-ggsave(plot = PEPC.global.1Dayplot, width = 50, height = 30, units = "mm", dpi = 300,filename = "ScriptManuscript2/Figures/Figure3/AB_PEPCglobalD1.jpg")                
+#ggsave(plot = PEPC.global.1Dayplot, width = 50, height = 30, units = "mm", dpi = 300,filename = "ScriptManuscript2/Figures/Figure3/AB_PEPCglobalD1.jpg")                
 
 #_______________________________________________________________________________________________________________________
 
@@ -298,7 +298,7 @@ Abundance.global.1Dayplot.CL <- Abundance.global.1Day.CL %>%
   theme(axis.title.x =element_blank()) + theme(axis.title.y =element_blank()) + theme(axis.text.x =element_blank()) +
   scale_colour_manual(values = c("ct" = "red", "cbr" = "green", "syd" = "blue", "s06" = "blue")) 
 
-ggsave(plot = Abundance.global.1Dayplot.CL, width = 50, height = 30, units = "mm", dpi = 300,filename = "ScriptManuscript2/Figures/Figure3/AB_CLglobalD1.jpg")                
+#ggsave(plot = Abundance.global.1Dayplot.CL, width = 50, height = 30, units = "mm", dpi = 300,filename = "ScriptManuscript2/Figures/Figure3/AB_CLglobalD1.jpg")                
 
 #_________________
 
@@ -329,7 +329,7 @@ Abundance.global.1Dayplot.PE <- Abundance.global.1Day.PE %>%
   theme(axis.title.x =element_blank()) + theme(axis.title.y =element_blank()) + theme(axis.text.x =element_blank()) +
   scale_colour_manual(values = c("ct" = "red", "cbr" = "green", "syd" = "blue", "s06" = "blue")) 
 
-ggsave(plot = Abundance.global.1Dayplot.PE, width = 50, height = 30, units = "mm", dpi = 300,filename = "ScriptManuscript2/Figures/Figure3/AB_PEglobalD1.jpg")                
+#ggsave(plot = Abundance.global.1Dayplot.PE, width = 50, height = 30, units = "mm", dpi = 300,filename = "ScriptManuscript2/Figures/Figure3/AB_PEglobalD1.jpg")                
 
 #_________________
 
@@ -360,7 +360,7 @@ Abundance.global.1Dayplot.PG <- Abundance.global.1Day.PG %>%
   theme(axis.title.x =element_blank()) + theme(axis.title.y =element_blank()) + theme(axis.text.x =element_blank()) +
   scale_colour_manual(values = c("ct" = "red", "cbr" = "green", "syd" = "blue", "s06" = "blue")) 
 
-ggsave(plot = Abundance.global.1Dayplot.PG, width = 50, height = 30, units = "mm", dpi = 300,filename = "ScriptManuscript2/Figures/Figure3/AB_PGglobalD1.jpg")                
+#ggsave(plot = Abundance.global.1Dayplot.PG, width = 50, height = 30, units = "mm", dpi = 300,filename = "ScriptManuscript2/Figures/Figure3/AB_PGglobalD1.jpg")                
 
 #_________________
 
@@ -390,7 +390,7 @@ Abundance.global.1Dayplot.PI <- Abundance.global.1Day.PI %>%
   theme(axis.title.x =element_blank()) + theme(axis.title.y =element_blank()) + theme(axis.text.x =element_blank()) +
   scale_colour_manual(values = c("ct" = "red", "cbr" = "green", "syd" = "blue", "s06" = "blue")) 
 
-ggsave(plot = Abundance.global.1Dayplot.PI, width = 50, height = 30, units = "mm", dpi = 300,filename = "ScriptManuscript2/Figures/Figure3/AB_PIglobalD1.jpg")                
+#ggsave(plot = Abundance.global.1Dayplot.PI, width = 50, height = 30, units = "mm", dpi = 300,filename = "ScriptManuscript2/Figures/Figure3/AB_PIglobalD1.jpg")                
 
 #_________________
 
@@ -421,7 +421,7 @@ Abundance.global.1Dayplot.PS <- Abundance.global.1Day.PS %>%
   theme(axis.title.x =element_blank()) + theme(axis.title.y =element_blank()) + theme(axis.text.x =element_blank()) +
   scale_colour_manual(values = c("ct" = "red", "cbr" = "green", "syd" = "blue", "s06" = "blue"))
 
-ggsave(plot = Abundance.global.1Dayplot.PS, width = 50, height = 30, units = "mm", dpi = 300,filename = "ScriptManuscript2/Figures/Figure3/AB_PSglobalD1.jpg")                
+#ggsave(plot = Abundance.global.1Dayplot.PS, width = 50, height = 30, units = "mm", dpi = 300,filename = "ScriptManuscript2/Figures/Figure3/AB_PSglobalD1.jpg")                
 
 #__________________19 Day Class Abundance___________________________
 
@@ -462,7 +462,7 @@ Abundance.global.19Dayplot.PC <- Abundance.global.19Day.PC %>%
   theme(axis.title.x =element_blank()) + theme(axis.title.y =element_blank()) + theme(axis.text.x =element_blank()) +
   scale_colour_manual(values = c("ct" = "red", "cbr" = "green", "syd" = "blue", "s06" = "blue"))
 
-ggsave(plot = Abundance.global.19Dayplot.PC, width = 50, height = 30, units = "mm", dpi = 300,filename = "ScriptManuscript2/Figures/Figure3/AB_PCglobalD19.jpg")                
+#ggsave(plot = Abundance.global.19Dayplot.PC, width = 50, height = 30, units = "mm", dpi = 300,filename = "ScriptManuscript2/Figures/Figure3/AB_PCglobalD19.jpg")                
 
 
 #___________________________Variable: Mean carbon chain length analysis_________________________
@@ -587,7 +587,7 @@ CC.global.1Dayplot.CL <- CC.global.1Day.CL %>%
   theme(axis.title.x =element_blank()) + theme(axis.title.y =element_blank()) + theme(axis.text.x =element_blank()) +
   scale_colour_manual(values = c("ct" = "red", "cbr" = "green", "syd" = "blue", "s06" = "blue"))
 
-ggsave(plot = CC.global.1Dayplot.CL, width = 50, height = 30, units = "mm", dpi = 300,filename = "ScriptManuscript2/Figures/Figure3/CC_CLglobalD1.jpg") 
+#ggsave(plot = CC.global.1Dayplot.CL, width = 50, height = 30, units = "mm", dpi = 300,filename = "ScriptManuscript2/Figures/Figure3/CC_CLglobalD1.jpg") 
 
 #__
 
@@ -647,7 +647,7 @@ CC.global.1Dayplot.PE <- CC.global.1Day.PE %>%
   theme(axis.title.x =element_blank()) + theme(axis.title.y =element_blank()) + theme(axis.text.x =element_blank()) +
   scale_colour_manual(values = c("ct" = "red", "cbr" = "green", "syd" = "blue", "s06" = "blue"))
 
-ggsave(plot = CC.global.1Dayplot.PE, width = 50, height = 30, units = "mm", dpi = 300,filename = "ScriptManuscript2/Figures/Figure3/CC_PEglobalD1.jpg") 
+#ggsave(plot = CC.global.1Dayplot.PE, width = 50, height = 30, units = "mm", dpi = 300,filename = "ScriptManuscript2/Figures/Figure3/CC_PEglobalD1.jpg") 
 #__
 
 CC.global.1Day.PG <- DF_glm02_1 %>% 
@@ -677,7 +677,7 @@ CC.global.1Dayplot.PG <- CC.global.1Day.PG %>%
   theme(axis.title.x =element_blank()) + theme(axis.title.y =element_blank()) + theme(axis.text.x =element_blank()) +
   scale_colour_manual(values = c("ct" = "red", "cbr" = "green", "syd" = "blue", "s06" = "blue"))
 
-ggsave(plot = CC.global.1Dayplot.PG, width = 50, height = 30, units = "mm", dpi = 300,filename = "ScriptManuscript2/Figures/Figure3/CC_PGglobalD1.jpg") 
+#ggsave(plot = CC.global.1Dayplot.PG, width = 50, height = 30, units = "mm", dpi = 300,filename = "ScriptManuscript2/Figures/Figure3/CC_PGglobalD1.jpg") 
 
 #__
 
@@ -707,7 +707,7 @@ CC.global.1Dayplot.LPC <- CC.global.1Day.LPC %>%
   theme(axis.title.x =element_blank()) + theme(axis.title.y =element_blank()) + theme(axis.text.x =element_blank()) +
   scale_colour_manual(values = c("ct" = "red", "cbr" = "green", "syd" = "blue", "s06" = "blue"))
 
-ggsave(plot = CC.global.1Dayplot.LPC, width = 50, height = 30, units = "mm", dpi = 300,filename = "ScriptManuscript2/Figures/Figure3/CC_LPCglobalD1.jpg") 
+#ggsave(plot = CC.global.1Dayplot.LPC, width = 50, height = 30, units = "mm", dpi = 300,filename = "ScriptManuscript2/Figures/Figure3/CC_LPCglobalD1.jpg") 
 
 
 #_______Day 19_____
@@ -775,7 +775,7 @@ CC.global.19Dayplot.CL <- CC.global.19Day.CL %>%
   theme(axis.title.x =element_blank()) + theme(axis.title.y =element_blank()) + theme(axis.text.x =element_blank()) +
   scale_colour_manual(values = c("ct" = "red", "cbr" = "green", "syd" = "blue", "s06" = "blue"))  
 
-ggsave(plot = CC.global.19Dayplot.CL, width = 50, height = 30, units = "mm", dpi = 300,filename = "ScriptManuscript2/Figures/Figure3/CC_CLglobalD19.jpg") 
+#ggsave(plot = CC.global.19Dayplot.CL, width = 50, height = 30, units = "mm", dpi = 300,filename = "ScriptManuscript2/Figures/Figure3/CC_CLglobalD19.jpg") 
 
 #__
 
@@ -805,7 +805,7 @@ CC.global.19Dayplot.PC <- CC.global.19Day.PC %>%
   theme(axis.title.x =element_blank()) + theme(axis.title.y =element_blank()) + theme(axis.text.x =element_blank()) +
   scale_colour_manual(values = c("ct" = "red", "cbr" = "green", "syd" = "blue", "s06" = "blue"))  
 
-ggsave(plot = CC.global.19Dayplot.PC, width = 50, height = 30, units = "mm", dpi = 300,filename = "ScriptManuscript2/Figures/Figure3/CC_PCglobalD19.jpg") 
+#ggsave(plot = CC.global.19Dayplot.PC, width = 50, height = 30, units = "mm", dpi = 300,filename = "ScriptManuscript2/Figures/Figure3/CC_PCglobalD19.jpg") 
 
 #__
 
@@ -835,7 +835,7 @@ CC.global.19Dayplot.PI <- CC.global.19Day.PI %>%
   theme(axis.title.x =element_blank()) + theme(axis.title.y =element_blank()) + theme(axis.text.x =element_blank()) +
   scale_colour_manual(values = c("ct" = "red", "cbr" = "green", "syd" = "blue", "s06" = "blue"))  
 
-ggsave(plot = CC.global.19Dayplot.PI, width = 50, height = 30, units = "mm", dpi = 300,filename = "ScriptManuscript2/Figures/Figure3/CC_PIglobalD19.jpg") 
+#ggsave(plot = CC.global.19Dayplot.PI, width = 50, height = 30, units = "mm", dpi = 300,filename = "ScriptManuscript2/Figures/Figure3/CC_PIglobalD19.jpg") 
 
 
 #___________________________Variable: Mean double bond content analysis_________________________
@@ -907,7 +907,7 @@ DB.global.1Dayplot.CL <- DB.global.1Day.CL %>%
   theme(axis.title.x =element_blank()) + theme(axis.title.y =element_blank()) + theme(axis.text.x =element_blank()) +
   scale_colour_manual(values = c("ct" = "red", "cbr" = "green", "syd" = "blue", "s06" = "blue"))
 
-ggsave(plot = DB.global.1Dayplot.CL, width = 50, height = 30, units = "mm", dpi = 300,filename = "ScriptManuscript2/Figures/Figure3/DB_CLglobalD1.jpg") 
+#ggsave(plot = DB.global.1Dayplot.CL, width = 50, height = 30, units = "mm", dpi = 300,filename = "ScriptManuscript2/Figures/Figure3/DB_CLglobalD1.jpg") 
 
 #__
 
@@ -937,7 +937,7 @@ DB.global.1Dayplot.PC <- DB.global.1Day.PC%>%
   theme(axis.title.x =element_blank()) + theme(axis.title.y =element_blank()) + theme(axis.text.x =element_blank()) +
   scale_colour_manual(values = c("ct" = "red", "cbr" = "green", "syd" = "blue", "s06" = "blue"))
 
-ggsave(plot = DB.global.1Dayplot.PC, width = 50, height = 30, units = "mm", dpi = 300,filename = "ScriptManuscript2/Figures/Figure3/DB_PCglobalD1.jpg") 
+#ggsave(plot = DB.global.1Dayplot.PC, width = 50, height = 30, units = "mm", dpi = 300,filename = "ScriptManuscript2/Figures/Figure3/DB_PCglobalD1.jpg") 
 
 #__
 
@@ -967,7 +967,7 @@ DB.global.1Dayplot.PE <- DB.global.1Day.PE %>%
   theme(axis.title.x =element_blank()) + theme(axis.title.y =element_blank()) + theme(axis.text.x =element_blank()) +
   scale_colour_manual(values = c("ct" = "red", "cbr" = "green", "syd" = "blue", "s06" = "blue"))
 
-ggsave(plot = DB.global.1Dayplot.PE, width = 50, height = 30, units = "mm", dpi = 300,filename = "ScriptManuscript2/Figures/Figure3/DB_PEglobalD1.jpg") 
+#ggsave(plot = DB.global.1Dayplot.PE, width = 50, height = 30, units = "mm", dpi = 300,filename = "ScriptManuscript2/Figures/Figure3/DB_PEglobalD1.jpg") 
 
 #__
 
@@ -997,7 +997,7 @@ DB.global.1Dayplot.PG <- DB.global.1Day.PG %>%
   theme(axis.title.x =element_blank()) + theme(axis.title.y =element_blank()) + theme(axis.text.x =element_blank()) +
   scale_colour_manual(values = c("ct" = "red", "cbr" = "green", "syd" = "blue", "s06" = "blue"))
 
-ggsave(plot = DB.global.1Dayplot.PG, width = 50, height = 30, units = "mm", dpi = 300,filename = "ScriptManuscript2/Figures/Figure3/DB_PGglobalD1.jpg") 
+#ggsave(plot = DB.global.1Dayplot.PG, width = 50, height = 30, units = "mm", dpi = 300,filename = "ScriptManuscript2/Figures/Figure3/DB_PGglobalD1.jpg") 
 
 #__
 
@@ -1027,7 +1027,7 @@ DB.global.1Dayplot.LPC <- DB.global.1Day.LPC %>%
   theme(axis.title.x =element_blank()) + theme(axis.title.y =element_blank()) + theme(axis.text.x =element_blank()) +
   scale_colour_manual(values = c("ct" = "red", "cbr" = "green", "syd" = "blue", "s06" = "blue"))
 
-ggsave(plot = DB.global.1Dayplot.LPC, width = 50, height = 30, units = "mm", dpi = 300,filename = "ScriptManuscript2/Figures/Figure3/DB_LPCglobalD1.jpg") 
+#ggsave(plot = DB.global.1Dayplot.LPC, width = 50, height = 30, units = "mm", dpi = 300,filename = "ScriptManuscript2/Figures/Figure3/DB_LPCglobalD1.jpg") 
 
 
 #_______Day 19_____

@@ -22,7 +22,7 @@ rm(list=ls())
 
 # 1. Make a correlation plot for mean CC in alkyl vs acyl chains in ELNLs.
 
-ELNLChainCC <- read_excel("ScriptManuscript2/MainTables/AlkylAcylENL_CC.xlsx") %>% 
+ELNLChainCC <- read_excel("data/data_plot/AlkylAcylENL_CC.xlsx") %>% 
   dplyr::rename(Alkyl = "ENLs (akyl)") %>% 
   dplyr::rename(Acyl = "ENLs (acyl)") %>% 
   dplyr::filter(Age == "Day 1")
@@ -85,7 +85,7 @@ plotENL <- ELNLChainCC %>%
 
 # 2. Make a correlation plot for mean CC in alkyl vs acyl chains in EPLs.
 
-EPLChainCC <- read_excel("ScriptManuscript2/MainTables/AlkylAcylEPL_CC.xlsx") %>% 
+EPLChainCC <- read_excel("data/data_plot/AlkylAcylEPL_CC.xlsx") %>% 
   dplyr::rename(Alkyl = "EPLs (akyl)") %>% 
   dplyr::rename(Acyl = "EPLs (acyl)") %>% 
   dplyr::filter(Age == "Day 1")
@@ -118,7 +118,7 @@ plotEPL <- EPLChainCC %>%
 
 # make correlation plot for PEe
 
-CC_PEe <- read_excel("ScriptManuscript2/MainTables/CC_EPLClasses.xlsx") %>% 
+CC_PEe <- read_excel("data/data_plot/CC_EPLClasses.xlsx") %>% 
   dplyr::select(1,2,3,6,7,12,13) %>% 
   dplyr::rename(Alkyl = "PEe(alkyl)") %>% 
   dplyr::rename(Acyl = "PEe(acyl)") %>% 
@@ -151,7 +151,7 @@ plotPEe <- CC_PEe %>%
 
 # 3.make correlation plot for PEp
 
-CC_PEp <- read_excel("ScriptManuscript2/MainTables/CC_EPLClasses.xlsx") %>% 
+CC_PEp <- read_excel("data/data_plot/CC_EPLClasses.xlsx") %>% 
   dplyr::select(1,2,3,8,9,14,15) %>% 
   dplyr::rename(Alkyl = "PEp(alkyl)") %>% 
   dplyr::rename(Acyl = "PEp(acyl)") %>% 
@@ -205,7 +205,6 @@ Plot1_annotated <- annotate_figure(Plot1, top = text_grob("Day 1", hjust = 0.5, 
 
 #_______________________________________________________________________________________________________________
 
-#_______________________________________________________________________________________________________________
 
 #rm(list=ls())
 
@@ -214,7 +213,7 @@ Plot1_annotated <- annotate_figure(Plot1, top = text_grob("Day 1", hjust = 0.5, 
 
 # 1. Make a correlation plot for mean CC in alkyl vs acyl chains in ELNLs.
 
-ELNLChainCC <- read_excel("ScriptManuscript2/MainTables/AlkylAcylENL_CC.xlsx") %>% 
+ELNLChainCC <- read_excel("data/data_plot/AlkylAcylENL_CC.xlsx") %>% 
   dplyr::rename(Alkyl = "ENLs (akyl)") %>% 
   dplyr::rename(Acyl = "ENLs (acyl)") %>% 
   dplyr::filter(Age == "Day 19")
@@ -252,7 +251,7 @@ plotENL <- ELNLChainCC %>%
 
 # 2. Make a correlation plot for mean CC in alkyl vs acyl chains in EPLs.
 
-EPLChainCC <- read_excel("ScriptManuscript2/MainTables/AlkylAcylEPL_CC.xlsx") %>% 
+EPLChainCC <- read_excel("data/data_plot/AlkylAcylEPL_CC.xlsx") %>% 
   dplyr::rename(Alkyl = "EPLs (akyl)") %>% 
   dplyr::rename(Acyl = "EPLs (acyl)") %>% 
   dplyr::filter(Age == "Day 19")
@@ -285,7 +284,7 @@ plotEPL <- EPLChainCC %>%
 
 # make correlation plot for PEe
 
-CC_PEe <- read_excel("ScriptManuscript2/MainTables/CC_EPLClasses.xlsx") %>% 
+CC_PEe <- read_excel("data/data_plot/CC_EPLClasses.xlsx") %>% 
   dplyr::select(1,2,3,6,7,12,13) %>% 
   dplyr::rename(Alkyl = "PEe(alkyl)") %>% 
   dplyr::rename(Acyl = "PEe(acyl)") %>% 
@@ -318,7 +317,7 @@ plotPEe <- CC_PEe %>%
 
 # 3.make correlation plot for PEp
 
-CC_PEp <- read_excel("ScriptManuscript2/MainTables/CC_EPLClasses.xlsx") %>% 
+CC_PEp <- read_excel("data/data_plot/CC_EPLClasses.xlsx") %>% 
   dplyr::select(1,2,3,8,9,14,15) %>% 
   dplyr::rename(Alkyl = "PEp(alkyl)") %>% 
   dplyr::rename(Acyl = "PEp(acyl)") %>% 

@@ -1,7 +1,7 @@
 #___________________________________________25/01/2025________________________________________
 
 # Here we generate plots showing significant main and/or interaction effect of strain for 
-# Etherlipids class for variables abundance, CC and DB
+# Ether lipids class for variables abundance, CC and DB
 # Strain-specific means and 95% confidence intervals are shown. 
 # Where the interaction with weight was not sig, single plot is given showing estimates for 
 # all the strains, where the interaction was significant three plots are given, one for 
@@ -137,7 +137,7 @@ DF <- DF1 %>%
 
 # Import standards data
 
-df.old <- read_csv("MS1Standards/Table_ConcAllStandards.csv") %>% # this is data from 1st run
+df.old <- read_csv("data/Table_ConcAllStandards.csv") %>% # this is data from 1st run
   dplyr::select(Name, Class, area, Conc, Batch) %>%
   dplyr::filter(Class != "Cer" & Class != "FA" & Class != "SM" & Class != "PCp") %>% 
   dplyr::group_by(Name, Class, Conc, Batch) %>% 
@@ -242,7 +242,7 @@ Abundance.global.1Dayplot.DGe <- Abundance.global.1Day.DGe %>%
   theme(axis.title.x =element_blank()) + theme(axis.title.y =element_blank()) + theme(axis.text.x =element_blank()) +
   scale_colour_manual(values = c("ct" = "red", "cbr" = "green", "syd" = "blue", "s06" = "blue"))
 
-ggsave(plot = Abundance.global.1Dayplot.DGe, width = 50, height = 30, units = "mm", dpi = 300,filename = "ScriptManuscript2/Figures/Figure4/AB_DGeglobalD1.jpg")
+#ggsave(plot = Abundance.global.1Dayplot.DGe, width = 50, height = 30, units = "mm", dpi = 300,filename = "ScriptManuscript2/Figures/Figure4/AB_DGeglobalD1.jpg")
 
 #_______
 
@@ -272,7 +272,7 @@ Abundance.global.1Dayplot.TGe <- Abundance.global.1Day.TGe %>%
   theme(axis.title.x =element_blank()) + theme(axis.title.y =element_blank()) + theme(axis.text.x =element_blank()) +
   scale_colour_manual(values = c("ct" = "red", "cbr" = "green", "syd" = "blue", "s06" = "blue"))
 
-ggsave(plot = Abundance.global.1Dayplot.TGe, width = 50, height = 30, units = "mm", dpi = 300,filename = "ScriptManuscript2/Figures/Figure4/AB_TGeglobalD1.jpg")
+#ggsave(plot = Abundance.global.1Dayplot.TGe, width = 50, height = 30, units = "mm", dpi = 300,filename = "ScriptManuscript2/Figures/Figure4/AB_TGeglobalD1.jpg")
 
 #_____
 
@@ -302,7 +302,7 @@ Abundance.global.1Dayplot.PCe <- Abundance.global.1Day.PCe %>%
   theme(axis.title.x =element_blank()) + theme(axis.title.y =element_blank()) + theme(axis.text.x =element_blank()) +
   scale_colour_manual(values = c("ct" = "red", "cbr" = "green", "syd" = "blue", "s06" = "blue"))
 
-ggsave(plot = Abundance.global.1Dayplot.PCe, width = 50, height = 30, units = "mm", dpi = 300,filename = "ScriptManuscript2/Figures/Figure5/AB_PCeglobalD1.jpg")
+#ggsave(plot = Abundance.global.1Dayplot.PCe, width = 50, height = 30, units = "mm", dpi = 300,filename = "ScriptManuscript2/Figures/Figure5/AB_PCeglobalD1.jpg")
 
 #_____
 
@@ -332,7 +332,7 @@ Abundance.global.1Dayplot.PEe <- Abundance.global.1Day.PEe %>%
   theme(axis.title.x =element_blank()) + theme(axis.title.y =element_blank()) + theme(axis.text.x =element_blank()) +
   scale_colour_manual(values = c("ct" = "red", "cbr" = "green", "syd" = "blue", "s06" = "blue"))
 
-ggsave(plot = Abundance.global.1Dayplot.PEe, width = 50, height = 30, units = "mm", dpi = 300,filename = "ScriptManuscript2/Figures/Figure5/AB_PEeglobalD1.jpg")
+#ggsave(plot = Abundance.global.1Dayplot.PEe, width = 50, height = 30, units = "mm", dpi = 300,filename = "ScriptManuscript2/Figures/Figure5/AB_PEeglobalD1.jpg")
 
 #_____
 
@@ -364,7 +364,7 @@ Abundance.global.1Dayplot.PEp <- Abundance.global.1Day.PEp %>%
   theme(axis.title.x =element_blank()) + theme(axis.title.y =element_blank()) + theme(axis.text.x =element_blank()) +
   scale_colour_manual(values = c("ct" = "red", "cbr" = "green", "syd" = "blue", "s06" = "blue"))
 
-ggsave(plot = Abundance.global.1Dayplot.PEp, width = 50, height = 30, units = "mm", dpi = 300,filename = "ScriptManuscript2/Figures/Figure5/AB_PEpglobalD1.jpg")
+#ggsave(plot = Abundance.global.1Dayplot.PEp, width = 50, height = 30, units = "mm", dpi = 300,filename = "ScriptManuscript2/Figures/Figure5/AB_PEpglobalD1.jpg")
 
 #_____
 
@@ -394,7 +394,7 @@ Abundance.global.1Dayplot.PSe <- Abundance.global.1Day.PSe %>%
   theme(axis.title.x =element_blank()) + theme(axis.title.y =element_blank()) + theme(axis.text.x =element_blank()) +
   scale_colour_manual(values = c("ct" = "red", "cbr" = "green", "syd" = "blue", "s06" = "blue"))
 
-ggsave(plot = Abundance.global.1Dayplot.PSe, width = 50, height = 30, units = "mm", dpi = 300,filename = "ScriptManuscript2/Figures/Figure5/AB_PSeglobalD1.jpg")
+#ggsave(plot = Abundance.global.1Dayplot.PSe, width = 50, height = 30, units = "mm", dpi = 300,filename = "ScriptManuscript2/Figures/Figure5/AB_PSeglobalD1.jpg")
 
 
 #__________________19 Day Class Abundance___________________________
@@ -435,7 +435,7 @@ Abundance.global.19Dayplot.TGe <- Abundance.global.19Day.TGe %>%
   theme(axis.title.x =element_blank()) + theme(axis.title.y =element_blank()) + theme(axis.text.x =element_blank()) +
   scale_colour_manual(values = c("ct" = "red", "cbr" = "green", "syd" = "blue", "s06" = "blue"))
 
-ggsave(plot = Abundance.global.19Dayplot.TGe, width = 50, height = 30, units = "mm", dpi = 300,filename = "ScriptManuscript2/Figures/Figure4/AB_TGeglobalD19.jpg")
+#ggsave(plot = Abundance.global.19Dayplot.TGe, width = 50, height = 30, units = "mm", dpi = 300,filename = "ScriptManuscript2/Figures/Figure4/AB_TGeglobalD19.jpg")
 
 #________
 
@@ -465,7 +465,7 @@ Abundance.global.19Dayplot.PEp <- Abundance.global.19Day.PEp %>%
   theme(axis.title.x =element_blank()) + theme(axis.title.y =element_blank()) + theme(axis.text.x =element_blank()) +
   scale_colour_manual(values = c("ct" = "red", "cbr" = "green", "syd" = "blue", "s06" = "blue"))
 
-ggsave(plot = Abundance.global.19Dayplot.PEp, width = 50, height = 30, units = "mm", dpi = 300,filename = "ScriptManuscript2/Figures/Figure5/AB_PEpglobalD19.jpg")
+#ggsave(plot = Abundance.global.19Dayplot.PEp, width = 50, height = 30, units = "mm", dpi = 300,filename = "ScriptManuscript2/Figures/Figure5/AB_PEpglobalD19.jpg")
 
 #________________________________________________________________________________________________________________
 
@@ -596,7 +596,7 @@ AlkylCC.global.19Dayplot.TGe <- AlkylCC.global.19Day.TGe %>%
   theme(axis.title.x =element_blank()) + theme(axis.title.y =element_blank()) + theme(axis.text.x =element_blank()) +
   scale_colour_manual(values = c("ct" = "red", "cbr" = "green", "syd" = "blue", "s06" = "blue"))
 
-ggsave(plot = AlkylCC.global.19Dayplot.TGe, width = 50, height = 30, units = "mm", dpi = 300,filename = "ScriptManuscript2/Figures/Figure4/CC_AlkylchainTGeglobalD19.jpg")
+#ggsave(plot = AlkylCC.global.19Dayplot.TGe, width = 50, height = 30, units = "mm", dpi = 300,filename = "ScriptManuscript2/Figures/Figure4/CC_AlkylchainTGeglobalD19.jpg")
 
 #______
 
@@ -625,7 +625,7 @@ AlkylCC.bottom.19Dayplot.TGe <- AlkylCC.bottom.19Day.TGe %>%
   theme(axis.title.x =element_blank()) + theme(axis.title.y =element_blank()) + theme(axis.text.x =element_blank()) +
   scale_colour_manual(values = c("ct" = "red", "cbr" = "green", "syd" = "blue", "s06" = "blue"))
 
-ggsave(plot = AlkylCC.bottom.19Dayplot.TGe, width = 50, height = 30, units = "mm", dpi = 300,filename = "ScriptManuscript2/Figures/Figure4/CC_AlkylchainTGebottomD19.jpg")
+#ggsave(plot = AlkylCC.bottom.19Dayplot.TGe, width = 50, height = 30, units = "mm", dpi = 300,filename = "ScriptManuscript2/Figures/Figure4/CC_AlkylchainTGebottomD19.jpg")
 
 #______
 
@@ -654,7 +654,7 @@ AlkylCC.top.19Dayplot.TGe <- AlkylCC.top.19Day.TGe %>%
   theme(axis.title.x =element_blank()) + theme(axis.title.y =element_blank()) + theme(axis.text.x =element_blank()) +
   scale_colour_manual(values = c("ct" = "red", "cbr" = "green", "syd" = "blue", "s06" = "blue"))
 
-ggsave(plot = AlkylCC.top.19Dayplot.TGe, width = 50, height = 30, units = "mm", dpi = 300,filename = "ScriptManuscript2/Figures/Figure4/CC_AlkylchainTGetopD19.jpg")
+#ggsave(plot = AlkylCC.top.19Dayplot.TGe, width = 50, height = 30, units = "mm", dpi = 300,filename = "ScriptManuscript2/Figures/Figure4/CC_AlkylchainTGetopD19.jpg")
 
 #____________________
 # Variable: Mean carbon content in acyl chains of TGe Day 1
@@ -718,7 +718,7 @@ AcylCC.global.1Dayplot.TGe <- AcylCC.global.1Day.TGe %>%
   theme(axis.title.x =element_blank()) + theme(axis.title.y =element_blank()) + theme(axis.text.x =element_blank()) +
   scale_colour_manual(values = c("ct" = "red", "cbr" = "green", "syd" = "blue", "s06" = "blue"))
 
-ggsave(plot = AcylCC.global.1Dayplot.TGe, width = 50, height = 30, units = "mm", dpi = 300,filename = "ScriptManuscript2/Figures/Figure4/CC_AcylchainTGeglobalD1.jpg")
+#ggsave(plot = AcylCC.global.1Dayplot.TGe, width = 50, height = 30, units = "mm", dpi = 300,filename = "ScriptManuscript2/Figures/Figure4/CC_AcylchainTGeglobalD1.jpg")
 
 
 #_______________________________________________________________________________________________________________________________________
@@ -787,7 +787,7 @@ AlkylDB.global.1Dayplot.TGe <- AlkylDB.global.1Day.TGe %>%
   theme(axis.title.x =element_blank()) + theme(axis.title.y =element_blank()) + theme(axis.text.x =element_blank()) +
   scale_colour_manual(values = c("ct" = "red", "cbr" = "green", "syd" = "blue", "s06" = "blue"))
 
-ggsave(plot = AlkylDB.global.1Dayplot.TGe, width = 50, height = 30, units = "mm", dpi = 300,filename = "ScriptManuscript2/Figures/Figure4/DB_AlkylchainTGeglobalD1.jpg")
+#ggsave(plot = AlkylDB.global.1Dayplot.TGe, width = 50, height = 30, units = "mm", dpi = 300,filename = "ScriptManuscript2/Figures/Figure4/DB_AlkylchainTGeglobalD1.jpg")
 
 #_____
 
@@ -816,7 +816,7 @@ AlkylDB.bottom.1Dayplot.TGe <- AlkylDB.bottom.1Day.TGe %>%
   theme(axis.title.x =element_blank()) + theme(axis.title.y =element_blank()) + theme(axis.text.x =element_blank()) +
   scale_colour_manual(values = c("ct" = "red", "cbr" = "green", "syd" = "blue", "s06" = "blue"))
 
-ggsave(plot = AlkylDB.bottom.1Dayplot.TGe, width = 50, height = 30, units = "mm", dpi = 300,filename = "ScriptManuscript2/Figures/Figure4/DB_AlkylchainTGebottomD1.jpg")
+#ggsave(plot = AlkylDB.bottom.1Dayplot.TGe, width = 50, height = 30, units = "mm", dpi = 300,filename = "ScriptManuscript2/Figures/Figure4/DB_AlkylchainTGebottomD1.jpg")
 
 #_____
 
@@ -845,7 +845,7 @@ AlkylDB.top.1Dayplot.TGe <- AlkylDB.top.1Day.TGe %>%
   theme(axis.title.x =element_blank()) + theme(axis.title.y =element_blank()) + theme(axis.text.x =element_blank()) +
   scale_colour_manual(values = c("ct" = "red", "cbr" = "green", "syd" = "blue", "s06" = "blue"))
 
-ggsave(plot = AlkylDB.top.1Dayplot.TGe, width = 50, height = 30, units = "mm", dpi = 300,filename = "ScriptManuscript2/Figures/Figure4/DB_AlkylchainTGetopD1.jpg")
+#ggsave(plot = AlkylDB.top.1Dayplot.TGe, width = 50, height = 30, units = "mm", dpi = 300,filename = "ScriptManuscript2/Figures/Figure4/DB_AlkylchainTGetopD1.jpg")
 
 #______________________________________
 

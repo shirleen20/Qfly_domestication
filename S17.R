@@ -21,7 +21,7 @@ rm(list=ls())
 
 #Make a correlation plot for mean DB in alkyl vs acyl chains in ELNLs.
 
-ELNLChainDB1 <- read_excel("ScriptManuscript2/MainTables/AlkylAcylENL_DB.xlsx") %>% 
+ELNLChainDB1 <- read_excel("data/data_plot/AlkylAcylENL_DB.xlsx") %>% 
   dplyr::rename(Alkyl = "ENLs (akyl)") %>% 
   dplyr::rename(Acyl = "ENLs (acyl)")  %>% 
   dplyr::filter(Age == "Day 1")
@@ -55,7 +55,7 @@ plotELNLDB1 <- ELNLChainDB1 %>%
 
 # Make a correlation plot for mean DB in alkyl vs acyl chains in ELPLs.
 
-ELPLChainDB1 <- read_excel("ScriptManuscript2/MainTables/AlkylAcylEPL_DB.xlsx") %>% 
+ELPLChainDB1 <- read_excel("data/data_plot/AlkylAcylEPL_DB.xlsx") %>% 
   dplyr::rename(Alkyl = "EPLs (akyl)") %>% 
   dplyr::rename(Acyl = "EPLs (acyl)") %>% 
   dplyr::filter(Age == "Day 1") 
@@ -135,7 +135,7 @@ Plot1_annotated <- annotate_figure(Plot1,top = text_grob("Day 1", hjust = 0.5, f
 
 # Make a correlation plot for mean DB in alkyl vs acyl chains in ELNLs.
 
-ELNLChainDB19 <- read_excel("ScriptManuscript2/MainTables/AlkylAcylENL_DB.xlsx") %>% 
+ELNLChainDB19 <- read_excel("data/data_plot/AlkylAcylENL_DB.xlsx") %>% 
   dplyr::rename(Alkyl = "ENLs (akyl)") %>% 
   dplyr::rename(Acyl = "ENLs (acyl)")  %>% 
   dplyr::filter(Age == "Day 19")
@@ -168,7 +168,7 @@ plotELNLDB19 <- ELNLChainDB19 %>%
 
 # Make a correlation plot for mean DB in alkyl vs acyl chains in ELPLs.
 
-ELPLChainDB19 <- read_excel("ScriptManuscript2/MainTables/AlkylAcylEPL_DB.xlsx") %>% 
+ELPLChainDB19 <- read_excel("data/data_plot/AlkylAcylEPL_DB.xlsx") %>% 
   dplyr::rename(Alkyl = "EPLs (akyl)") %>% 
   dplyr::rename(Acyl = "EPLs (acyl)") %>% 
   dplyr::filter(Age == "Day 19") 
