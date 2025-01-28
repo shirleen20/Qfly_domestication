@@ -137,7 +137,7 @@ DF <- DF1 %>%
 
 # Import standards data
 
-df.old <- read_csv("MS1Standards/Table_ConcAllStandards.csv") %>% # this is data from 1st run
+df.old <- read_csv("data/Table_ConcAllStandards.csv") %>% # this is data from 1st run
   dplyr::select(Name, Class, area, Conc, Batch) %>%
   dplyr::filter(Class != "Cer" & Class != "FA" & Class != "SM" & Class != "PCp") %>% 
   dplyr::group_by(Name, Class, Conc, Batch) %>% 
@@ -175,7 +175,6 @@ DF.main <- DF %>%
 
 #___________________________Variable: Mean carbon content analysis in ELs_________________________
 
-#__________________
 
 # Create dataframe to calculate mean CC and mean DB in the akyl and acyl chains of each ether linked classes with disambiguated chains:
 

@@ -97,6 +97,7 @@ DF1 <- NP.B01 %>%
 #______________________________________________________________________________________________________
 
 #______________ Create main data frame ________________________________________________________________
+
 Variables <- read_excel("data/Variables.xlsx") %>% 
   dplyr::select(ID, Weight, Time2) %>% 
   dplyr::rename(samples = ID) 
@@ -132,7 +133,7 @@ DF <- DF1 %>%
 
 # Import standards data
 
-df.old <- read_csv("MS1Standards/Table_ConcAllStandards.csv") %>% # this is data from 1st run
+df.old <- read_csv("data/Table_ConcAllStandards.csv") %>% # this is data from 1st run
   dplyr::select(Name, Class, area, Conc, Batch) %>%
   dplyr::filter(Class != "Cer" & Class != "FA" & Class != "SM" & Class != "PCp") %>% 
   dplyr::group_by(Name, Class, Conc, Batch) %>% 
@@ -194,12 +195,12 @@ Abn <- DF.main %>%
   dplyr::select(SubClass,Name,Age,ct_New,ct_Old,syd_New,syd_Old,s06_Older,cbr_New,cbr_Old) 
 
 Abn1 <- Abn %>% 
-  dplyr::filter(Age == "1 Day") %>% 
-  write_excel_csv("ScriptManuscript2/Commonchains/Abundance1_lipidspecies_in_each_strain.csv") 
+  dplyr::filter(Age == "1 Day") #%>% 
+  #write_excel_csv("ScriptManuscript2/Commonchains/Abundance1_lipidspecies_in_each_strain.csv") 
 
 Abn19 <- Abn %>% 
-  dplyr::filter(Age == "19 Day") %>% 
-  write_excel_csv("ScriptManuscript2/Commonchains/Abundance19_lipidspecies_in_each_strain.csv")
+  dplyr::filter(Age == "19 Day") #%>% 
+  #write_excel_csv("ScriptManuscript2/Commonchains/Abundance19_lipidspecies_in_each_strain.csv")
 
 # check to see the sum of percentages within a subclass should be same as the one for that subclass percentage abundance obtained in Table 1 of lipids MS1
 sum((Abn %>% dplyr::filter(Age == "1 Day" & LineTime == "ct_New"))$Percentage)

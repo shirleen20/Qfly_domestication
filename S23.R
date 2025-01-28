@@ -99,9 +99,12 @@ DF1 <- NP.B01 %>%
   dplyr::bind_rows(NP.B02) %>% 
   dplyr::bind_rows(NP.B03) %>%
   dplyr::bind_rows(NP.B04) 
-#______________________________________________________________________________________________________
 
-#______________ Create main data frame ________________________________________________________________
+#________________________________________________________________________________________________
+
+
+#___________________________Create main data frame ______________________________________________
+
 Variables <- read_excel("data/Variables.xlsx") %>% 
   dplyr::select(ID, Weight, Time2) %>% 
   dplyr::rename(samples = ID) 
@@ -137,7 +140,7 @@ DF <- DF1 %>%
 
 # Import standards data
 
-df.old <- read_csv("MS1Standards/Table_ConcAllStandards.csv") %>% # this is data from 1st run
+df.old <- read_csv("data/Table_ConcAllStandards.csv") %>% # this is data from 1st run
   dplyr::select(Name, Class, area, Conc, Batch) %>%
   dplyr::filter(Class != "Cer" & Class != "FA" & Class != "SM" & Class != "PCp") %>% 
   dplyr::group_by(Name, Class, Conc, Batch) %>% 
@@ -175,7 +178,6 @@ DF.main <- DF %>%
 
 #___________________________Variable: Mean double bond content analysis in ELs_________________________
 
-#__________________
 
 # Create dataframe to calculate mean CC and mean DB in the akyl and acyl chains of each ether linked classes with disambiguated chains:
 
@@ -243,10 +245,11 @@ Composition <- bind_rows(LIST1, .id = "Class") %>%
                                             "NLs"))))%>% 
   dplyr::filter(SubClass %in% c("TG e", "PE p", "PE e"))  # we remove PCe from analysis because there is no variation between samples for mean 
 
-#__________________
+
+#_________________________________________________________________________________________________________________
 
 
-#_____________________Variable: Mean double bond analysis in alkyl/acyl chain ELs___________
+#_____________________Variable: Mean double bond analysis in alkyl/acyl chain ELs_________________
 
 
 # Variable: Mean double bond content in alkyl chains of ether lipid classes 
@@ -338,7 +341,7 @@ FDRcorrected.M1_19DBAlkyl <- M1_19DBAlkyl %>%
   dplyr::mutate(p.value = stars.pval(p.value))
 
 
-#___________________Test hypothesis 2_____________________________________________________________
+#___________________Test hypothesis 2__________________________
 
 DF_glm02_D1 <- DBAlkyl %>%
   dplyr::filter(Age == "1 Day") %>% 
@@ -397,9 +400,8 @@ FDRcorrected.M2_19DBAlkyl <- M2_19DBAlkyl %>%
   dplyr::mutate(p.value = p.adjust((p.value), method = "fdr", n = length(p.value))) %>% 
   dplyr::mutate(p.value = stars.pval(p.value))
 
+#_________________________________________________________________________________________________________________
 
-#_________________________________________________________________________________________________________________
-#_________________________________________________________________________________________________________________
 
 #___________________Variable: Mean double bond content in acyl chains of ELs_____________________________ 
 
