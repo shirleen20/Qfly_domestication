@@ -1,8 +1,8 @@
 #_________________________________________24/01/2025____________________________________
 
-# Here we use lipid concentrations to calculate lipid diversities and abundances, mean Carbon
-# and mean double bond content in the seven strains to generate Figure 1, Table S3-S6 and we 
-# make correlation plots to generate Figure 6 and Figure S2
+# Here we calculate diversities, abundances, mean Carbon and mean double bond content
+# in the seven strains to generate Figure 1, Table S3-S6 and we make correlation plots
+# to generate Figure 6 and Figure S2
 
 library("tidyverse")
 library("ggrepel")

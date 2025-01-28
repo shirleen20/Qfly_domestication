@@ -1,7 +1,7 @@
 #______________________________________24/01/2025_______________________________
 
 # Here we calculate fly weight weight differences and plot dry weight vs total lipid titre for 
-# the seven strains to generate Figure 1, Table S3, Figure S1 and Dataset S1.
+# the seven strains to generate Figure S1, Table S3, and Dataset S1.
 
 library("tidyverse")
 library("ggrepel")
@@ -262,3 +262,4 @@ TL.WT <- cbind(WeightsSE, TLSE) %>%
   dplyr::mutate(Line = replace(Line, Line == "cbr", "CN")) %>% 
   dplyr::mutate(Line = replace(Line, Line == "ct", "CT")) %>% 
   dplyr::mutate(Line = replace(Line, Line == "syd", "SD")) 
+
