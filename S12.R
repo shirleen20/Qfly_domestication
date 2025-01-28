@@ -6,7 +6,7 @@
 # Where the interaction with weight was not sig, single plot is given showing estimates for 
 # all the strains, where the interaction was significant three plots are given, one for 
 # lightest 10% of flies one for mean weight, and one for heaviest 10% of flies.
-# We use this analysis to generate Figure 3.
+# We use this analysis to generate Figure 3, Tables 2 and 3.
 
 library("tidyverse")
 library("ggrepel")

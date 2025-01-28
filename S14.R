@@ -1,12 +1,12 @@
 #___________________________________________25/01/2025________________________________________
 
 # Here we generate plots showing significant main and/or interaction effect of strain for 
-# Etherlipids category for variables abundance, CC and DB
+# Ether lipids category for variables abundance, CC and DB
 # Strain-specific means and 95% confidence intervals are shown. 
 # Where the interaction with weight was not sig, single plot is given showing estimates for 
 # all the strains, where the interaction was significant three plots are given, one for 
 # lightest 10% of flies one for mean weight, and one for heaviest 10% of flies.
-# We use this analysis to generate Figures 4 and 5.
+# We use this analysis to generate Figures 4 and 5, Tables 2 and 3.
 
 library("tidyverse")
 library("ggrepel")
