@@ -17,7 +17,7 @@ rm(list=ls())
 
 #______________ Create main data frame ________________________________________________________________
 
-Variables <- read_excel("ScriptManuscript2/Figures/Data_F1.xlsx")
+Variables <- read_excel("data/Data_F1.xlsx")
 
 pd = position_dodge(0.4)
 
@@ -119,9 +119,8 @@ p2 <- Variables %>%
 #ggsave(plot = p2, width = 2.2, height = 1.2, units = "in", dpi = 300,filename = "ScriptManuscript2/Figures/F1.2.TL.jpg")                
 
 
-#___________________________________________Plots for abundance_________________________________________________
+#________________________________Plots for abundance_____________________________________
 
-#______________________________________________
 # We need these functions to plot p3
 
 max_first1  <- 44.3   # Specify max of first y axis

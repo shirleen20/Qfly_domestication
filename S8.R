@@ -133,7 +133,7 @@ DF <- DF1 %>%
 
 # Import standards data
 
-df.old <- read_csv("MS1Standards/Table_ConcAllStandards.csv") %>% # this is data from 1st run
+df.old <- read_csv("data/Table_ConcAllStandards.csv") %>% # this is data from 1st run
   dplyr::select(Name, Class, area, Conc, Batch) %>%
   dplyr::filter(Class != "Cer" & Class != "FA" & Class != "SM" & Class != "PCp") %>% 
   dplyr::group_by(Name, Class, Conc, Batch) %>% 
@@ -541,58 +541,58 @@ M2.R <- by_SubClass.Age %>%
 
 #_______________________________Create Master table for CC ______________________________
 
-rm(list=ls())
-
-#_____________________
-Emmeans <- readxl::read_excel("ScriptManuscript2/ELsClass/EmmeansCC.xlsx")
-
-DF.p.Emmeans <- Emmeans 
-
-A <- DF.p.Emmeans %>% 
-  dplyr::select(-SE, -df) %>% 
-  dplyr::mutate(emmean =  formatC(as.numeric(emmean), format = "e", digits = 2)) %>% 
-  dplyr::mutate(lower.CL =  formatC(as.numeric(lower.CL), format = "e", digits = 2)) %>%
-  dplyr::mutate(upper.CL =  formatC(as.numeric(upper.CL), format = "e", digits = 2)) %>%      
-  dplyr::mutate(Unit = str_sub(emmean,-4,-1)) %>% 
-  dplyr::mutate(emmean = str_sub(emmean, end=-5)) %>% 
-  dplyr::mutate(lower.CL = str_sub(lower.CL, end=-5)) %>% 
-  dplyr::mutate(upper.CL = str_sub(upper.CL, end=-5)) %>% 
-  dplyr::mutate(left = "(", right = ")") %>% 
-  tidyr::unite("A", "lower.CL", "upper.CL", sep = "-") %>% 
-  tidyr::unite(B, "left", "A", "right", sep = "") %>%  
-  tidyr::unite("C", "emmean", "B", sep = "")    %>% 
-  tidyr::unite("P", "C", ".group", sep = " ")    %>%
-  dplyr::filter(Unit !=  " NA") %>% 
-  tidyr::pivot_wider(names_from = LineTime, values_from = P) #%>% 
-  #write_excel_csv("ScriptManuscript2/ELsClass/MastertableAlkylCCELsClass.csv")
-
-#___________________________
-
-rm(list=ls())
-
-# Here we generate Master table for emtrends AlkylCC 
-
-Emtrends <- readxl::read_excel("ScriptManuscript2/ELsClass/EmtrendsCC.xlsx")
-
-DF.p.Emtrends <- Emtrends 
-
-A <- DF.p.Emtrends %>% 
-  dplyr::select(-SE, -df) %>% 
-  dplyr::mutate(Weight.trend =  formatC(as.numeric(Weight.trend), format = "e", digits = 2)) %>% 
-  dplyr::mutate(lower.CL =  formatC(as.numeric(lower.CL), format = "e", digits = 2)) %>%
-  dplyr::mutate(upper.CL =  formatC(as.numeric(upper.CL), format = "e", digits = 2)) %>%      
-  dplyr::mutate(Unit = str_sub(Weight.trend,-4,-1)) %>% 
-  dplyr::mutate(Weight.trend = str_sub(Weight.trend, end=-5)) %>% 
-  dplyr::mutate(lower.CL = str_sub(lower.CL, end=-5)) %>% 
-  dplyr::mutate(upper.CL = str_sub(upper.CL, end=-5)) %>% 
-  dplyr::mutate(left = "(", right = ")") %>% 
-  tidyr::unite("A", "lower.CL", "upper.CL", sep = "-") %>% 
-  tidyr::unite(B, "left", "A", "right", sep = "") %>%  
-  tidyr::unite("C", "Weight.trend", "B", sep = "")    %>% 
-  tidyr::unite("P", "C", ".group", sep = " ")    %>%
-  dplyr::filter(Unit !=  " NA") %>% 
-  tidyr::pivot_wider(names_from = LineTime, values_from = P) #%>% 
-  #write_excel_csv("ScriptManuscript2/ELsClass/MastertableEmtrends.AlkylCC.csv")
+# rm(list=ls())
+# 
+# #_____________________
+# Emmeans <- readxl::read_excel("ScriptManuscript2/ELsClass/EmmeansCC.xlsx")
+# 
+# DF.p.Emmeans <- Emmeans 
+# 
+# A <- DF.p.Emmeans %>% 
+#   dplyr::select(-SE, -df) %>% 
+#   dplyr::mutate(emmean =  formatC(as.numeric(emmean), format = "e", digits = 2)) %>% 
+#   dplyr::mutate(lower.CL =  formatC(as.numeric(lower.CL), format = "e", digits = 2)) %>%
+#   dplyr::mutate(upper.CL =  formatC(as.numeric(upper.CL), format = "e", digits = 2)) %>%      
+#   dplyr::mutate(Unit = str_sub(emmean,-4,-1)) %>% 
+#   dplyr::mutate(emmean = str_sub(emmean, end=-5)) %>% 
+#   dplyr::mutate(lower.CL = str_sub(lower.CL, end=-5)) %>% 
+#   dplyr::mutate(upper.CL = str_sub(upper.CL, end=-5)) %>% 
+#   dplyr::mutate(left = "(", right = ")") %>% 
+#   tidyr::unite("A", "lower.CL", "upper.CL", sep = "-") %>% 
+#   tidyr::unite(B, "left", "A", "right", sep = "") %>%  
+#   tidyr::unite("C", "emmean", "B", sep = "")    %>% 
+#   tidyr::unite("P", "C", ".group", sep = " ")    %>%
+#   dplyr::filter(Unit !=  " NA") %>% 
+#   tidyr::pivot_wider(names_from = LineTime, values_from = P) #%>% 
+#   #write_excel_csv("ScriptManuscript2/ELsClass/MastertableAlkylCCELsClass.csv")
+# 
+# #___________________________
+# 
+# rm(list=ls())
+# 
+# # Here we generate Master table for emtrends AlkylCC 
+# 
+# Emtrends <- readxl::read_excel("ScriptManuscript2/ELsClass/EmtrendsCC.xlsx")
+# 
+# DF.p.Emtrends <- Emtrends 
+# 
+# A <- DF.p.Emtrends %>% 
+#   dplyr::select(-SE, -df) %>% 
+#   dplyr::mutate(Weight.trend =  formatC(as.numeric(Weight.trend), format = "e", digits = 2)) %>% 
+#   dplyr::mutate(lower.CL =  formatC(as.numeric(lower.CL), format = "e", digits = 2)) %>%
+#   dplyr::mutate(upper.CL =  formatC(as.numeric(upper.CL), format = "e", digits = 2)) %>%      
+#   dplyr::mutate(Unit = str_sub(Weight.trend,-4,-1)) %>% 
+#   dplyr::mutate(Weight.trend = str_sub(Weight.trend, end=-5)) %>% 
+#   dplyr::mutate(lower.CL = str_sub(lower.CL, end=-5)) %>% 
+#   dplyr::mutate(upper.CL = str_sub(upper.CL, end=-5)) %>% 
+#   dplyr::mutate(left = "(", right = ")") %>% 
+#   tidyr::unite("A", "lower.CL", "upper.CL", sep = "-") %>% 
+#   tidyr::unite(B, "left", "A", "right", sep = "") %>%  
+#   tidyr::unite("C", "Weight.trend", "B", sep = "")    %>% 
+#   tidyr::unite("P", "C", ".group", sep = " ")    %>%
+#   dplyr::filter(Unit !=  " NA") %>% 
+#   tidyr::pivot_wider(names_from = LineTime, values_from = P) #%>% 
+#   #write_excel_csv("ScriptManuscript2/ELsClass/MastertableEmtrends.AlkylCC.csv")
 
 
 #_______________________________________________________________________________________________________________________________________

@@ -1,5 +1,5 @@
 #_________________________________________24/01/2025____________________________________
-# Here we perform t-tests on variables double bond content n alkyl and acyl chains of ether lipid classes 
+# Here we perform t-tests on variables double bond content in alkyl and acyl chains of ether lipid classes 
 # We test two hypotheses about the patterns of lipidome changes during domestication. 
 # Hypothesis 1 is that the three old strains are more similar to one another than the 
 # three new strains are to one another and 

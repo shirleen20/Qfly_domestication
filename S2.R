@@ -132,7 +132,7 @@ DF <- DF1 %>%
 
 # Import standards data
 
-df.old <- read_csv("MS1Standards/Table_ConcAllStandards.csv") %>% # this is data from 1st run
+df.old <- read_csv("data/Table_ConcAllStandards.csv") %>% # this is data from 1st run
   dplyr::select(Name, Class, area, Conc, Batch) %>%
   dplyr::filter(Class != "Cer" & Class != "FA" & Class != "SM" & Class != "PCp") %>% 
   dplyr::group_by(Name, Class, Conc, Batch) %>% 
@@ -1063,6 +1063,6 @@ Figure2 <- grid.arrange(plotC, plotD, legend, ncol=2, nrow = 2, layout_matrix = 
 
 # Save Figure S2
 
-#ggsave(plot = Figure2, width =9, height = 6, units = "in", dpi = 300,filename = "ScriptManuscript2/Figures/Figure_S2_Alkyl_vs_Acyl_DB_Correlation_plot_ELs.jpg")              
+#ggsave(plot = Figure2, width =9, height = 6, units = "in", dpi = 300,filename = "Qfly_domestication/Figures/Figure_S2_Alkyl_vs_Acyl_DB_Correlation_plot_ELs.jpg")              
 
 #________________________________________END_________________________________________

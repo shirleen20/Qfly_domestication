@@ -135,7 +135,7 @@ DF <- DF1 %>%
 
 # Import standards data
 
-df.old <- read_csv("MS1Standards/Table_ConcAllStandards.csv") %>% # this is data from 1st run
+df.old <- read_csv("data/Table_ConcAllStandards.csv") %>% # this is data from 1st run
   dplyr::select(Name, Class, area, Conc, Batch) %>%
   dplyr::filter(Class != "Cer" & Class != "FA" & Class != "SM" & Class != "PCp") %>% 
   dplyr::group_by(Name, Class, Conc, Batch) %>% 
@@ -247,7 +247,7 @@ FDRcorrected.Category.fullmodel <- DF.p.values %>%
 
 # save Anova results after FDR corrections full model
 
-rbind(FDRcorrected.Category.fullmodel) %>% write_excel_csv("ScriptManuscript2/Abundance/FDRcorrected.Category.fullmodel.csv")
+rbind(FDRcorrected.Category.fullmodel) #%>% write_excel_csv("ScriptManuscript2/Abundance/FDRcorrected.Category.fullmodel.csv")
 
 # save Anova results for full model 
 
@@ -331,28 +331,28 @@ M1.R <- by_Type.Age %>%
 
 # Here we generate Master table from Anova and emmeans analysis 
 
-rm(list=ls())
+#rm(list=ls())
 
-Emmeans <- readxl::read_excel("ScriptManuscript2/Abundance/EmmeansCategory.xlsx")
+#Emmeans <- readxl::read_excel("ScriptManuscript2/Abundance/EmmeansCategory.xlsx")
 
-DF.p.Emmeans <- Emmeans  
+#DF.p.Emmeans <- Emmeans  
 
-A <- DF.p.Emmeans %>% 
-  dplyr::select(-SE, -df) %>% 
-  dplyr::mutate(emmean =  formatC(as.numeric(emmean), format = "e", digits = 2)) %>% 
-  dplyr::mutate(lower.CL =  formatC(as.numeric(lower.CL), format = "e", digits = 2)) %>%
-  dplyr::mutate(upper.CL =  formatC(as.numeric(upper.CL), format = "e", digits = 2)) %>%      
-  dplyr::mutate(Unit = str_sub(emmean,-4,-1)) %>% 
-  dplyr::mutate(emmean = str_sub(emmean, end=-5)) %>% 
-  dplyr::mutate(lower.CL = str_sub(lower.CL, end=-5)) %>% 
-  dplyr::mutate(upper.CL = str_sub(upper.CL, end=-5)) %>% 
-  dplyr::mutate(left = "(", right = ")") %>% 
-  tidyr::unite("A", "lower.CL", "upper.CL", sep = "-") %>% 
-  tidyr::unite(B, "left", "A", "right", sep = "") %>%  
-  tidyr::unite("C", "emmean", "B", sep = "")    %>% 
-  tidyr::unite("P", "C", ".group", sep = " ")    %>%
-  dplyr::filter(Unit !=  " NA") %>% 
-  tidyr::pivot_wider(names_from = LineTime, values_from = P) #%>%
+# A <- DF.p.Emmeans %>% 
+#   dplyr::select(-SE, -df) %>% 
+#   dplyr::mutate(emmean =  formatC(as.numeric(emmean), format = "e", digits = 2)) %>% 
+#   dplyr::mutate(lower.CL =  formatC(as.numeric(lower.CL), format = "e", digits = 2)) %>%
+#   dplyr::mutate(upper.CL =  formatC(as.numeric(upper.CL), format = "e", digits = 2)) %>%      
+#   dplyr::mutate(Unit = str_sub(emmean,-4,-1)) %>% 
+#   dplyr::mutate(emmean = str_sub(emmean, end=-5)) %>% 
+#   dplyr::mutate(lower.CL = str_sub(lower.CL, end=-5)) %>% 
+#   dplyr::mutate(upper.CL = str_sub(upper.CL, end=-5)) %>% 
+#   dplyr::mutate(left = "(", right = ")") %>% 
+#   tidyr::unite("A", "lower.CL", "upper.CL", sep = "-") %>% 
+#   tidyr::unite(B, "left", "A", "right", sep = "") %>%  
+#   tidyr::unite("C", "emmean", "B", sep = "")    %>% 
+#   tidyr::unite("P", "C", ".group", sep = " ")    %>%
+#   dplyr::filter(Unit !=  " NA") %>% 
+#   tidyr::pivot_wider(names_from = LineTime, values_from = P) #%>%
   #write_excel_csv("ScriptManuscript2/Abundance/MastertableCategory.csv")
 
 #______________________________END___________________________________
