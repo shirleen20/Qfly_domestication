@@ -617,7 +617,7 @@ CC.global.1Dayplot.PC <- CC.global.1Day.PC %>%
   theme(axis.title.x =element_blank()) + theme(axis.title.y =element_blank()) + theme(axis.text.x =element_blank()) +
   scale_colour_manual(values = c("ct" = "red", "cbr" = "green", "syd" = "blue", "s06" = "blue"))
 
-ggsave(plot = CC.global.1Dayplot.PC, width = 50, height = 30, units = "mm", dpi = 300,filename = "ScriptManuscript2/Figures/Figure3/CC_PCglobalD1.jpg") 
+#ggsave(plot = CC.global.1Dayplot.PC, width = 50, height = 30, units = "mm", dpi = 300,filename = "ScriptManuscript2/Figures/Figure3/CC_PCglobalD1.jpg") 
 
 #__
 

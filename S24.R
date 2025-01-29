@@ -203,8 +203,8 @@ Abn19 <- Abn %>%
   #write_excel_csv("ScriptManuscript2/Commonchains/Abundance19_lipidspecies_in_each_strain.csv")
 
 # check to see the sum of percentages within a subclass should be same as the one for that subclass percentage abundance obtained in Table 1 of lipids MS1
-sum((Abn %>% dplyr::filter(Age == "1 Day" & LineTime == "ct_New"))$Percentage)
-sum((Abn %>% dplyr::filter(Age == "1 Day" & SubClass == "PE" & LineTime == "cbr_New"))$Percentage)
+#sum((Abn %>% dplyr::filter(Age == "1 Day" & LineTime == "ct_New"))$Percentage)
+#sum((Abn %>% dplyr::filter(Age == "1 Day" & SubClass == "PE" & LineTime == "cbr_New"))$Percentage)
 
 
 #____________________________END______________________________

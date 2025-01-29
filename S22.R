@@ -390,8 +390,6 @@ FDRcorrected.M2_19CCAlkyl <- M2_19CCAlkyl %>%
   dplyr::mutate(p.value = p.adjust((p.value), method = "fdr", n = length(p.value))) %>% 
   dplyr::mutate(p.value = stars.pval(p.value))
 
-
-#_________________________________________________________________________________________________________________
 #_________________________________________________________________________________________________________________
 
 #___________________Variable: Mean carbon content in acyl chains of ether lipid classes____________________________ 
