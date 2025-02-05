@@ -236,7 +236,8 @@ WeightsSE <- DF.main %>%
 
 TLSE <- DF.main %>% 
   ungroup %>%
-  group_by(Samples) %>% 
+  group_by(Samples) %>%
+  #mutate(LipidWT = (Conc*Weight*50)) %>% 
   mutate(LipidWT = (Conc*Weight*50)*1e-6) %>%  #Convert from ng to mg
   ungroup() %>% 
   dplyr::group_by(Age,Samples) %>% 
@@ -290,6 +291,7 @@ Wt.TL.plotD1 <- TL.WT %>%
   theme(axis.text.y = element_text(size = 12), axis.text.x = element_text(size = 12)) + 
   theme(plot.title = element_text(face = "bold", hjust = 0.5, size = (12))) + theme(axis.title = element_text(size = 12))+
   scale_colour_manual(values = c("New" = "deepskyblue", "Old" = "blue", "Older" = "red"))+
+  ylim(expand = c(0, 0.50))+
   scale_shape_manual(values = c("CT" = 2, "CN" = 5, "SD" = 0))+
   theme(axis.title.x=element_blank(), axis.title.y=element_blank())
 
