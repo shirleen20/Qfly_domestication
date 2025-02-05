@@ -159,7 +159,7 @@ DF.main <- DF %>%
   mutate(LogAreaCheck = Intercept + Slope*(log10(Conc)), AreaCheck = 10^LogAreaCheck) ### Just to double check
 
 
-# Make weight plots to identify samples with weight outliers
+#______________Make weight plots to identify samples with weight outliers______________________
 
 # Histogram
 
@@ -231,30 +231,28 @@ WeightsSE <- DF.main %>%
   dplyr::select(1,2,5,6)
 
 
-#_____________________________________________________________________
+#__________Calculate Total lipid titre in lipid/fly and SE for each strain_____________
 
-# Calculate Total lipid titre in mglipid/fly and SE for each strain
 
 TLSE <- DF.main %>% 
   ungroup %>%
   group_by(Samples) %>% 
-  mutate(Conc.new = (Conc*Weight)/20) %>% 
+  mutate(LipidWT = (Conc*Weight*50)*1e-6) %>%  #Convert from ng to mg
   ungroup() %>% 
   dplyr::group_by(Age,Samples) %>% 
-  dplyr::mutate(Total.Conc = sum(Conc.new)) %>% 
+  dplyr::mutate(Total.Lipid = sum(LipidWT)) %>% 
   dplyr::ungroup() %>% 
-  dplyr::select(Samples, Line, Age, Time, Weight, Total.Conc) %>% 
+  dplyr::select(Samples, Line, Age, Time, Weight, Total.Lipid) %>% 
   unique() %>% 
   group_by(Samples) %>% 
-  summarySE(groupvars = c("Line", "Time", "Age"), measurevar = "Total.Conc") %>% 
+  summarySE(groupvars = c("Line", "Time", "Age"), measurevar = "Total.Lipid") %>% 
   ungroup() %>% 
   tidyr::unite(LineTime, Line, Time, remove = FALSE) %>%
-  dplyr::select(LineTime, Age, Total.Conc, se) %>% 
-  dplyr::mutate(TL = format(round(.$Total.Conc, 2), nsmall = 2)) %>% 
+  dplyr::select(LineTime, Age, Total.Lipid, se) %>% 
+  dplyr::mutate(TL = format(round(.$Total.Lipid, 2), nsmall = 2)) %>% 
   dplyr::mutate(TL.se = format(round(.$se, 2), nsmall = 2)) %>% 
   #tidyr::unite("TLSE", Total.Conc:se, sep = "±")
   dplyr::select(1,2,5,6)
-
 
 # Create a dataframe with total lipid + SE and Weight + SE 
 
@@ -268,7 +266,6 @@ TL.WT <- cbind(WeightsSE, TLSE) %>%
   dplyr::mutate(Line = replace(Line, Line == "cbr", "CN")) %>% 
   dplyr::mutate(Line = replace(Line, Line == "ct", "CT")) %>% 
   dplyr::mutate(Line = replace(Line, Line == "syd", "SD")) 
-
 
 #_____________make a correlation plot of weight vs total lipid titre_________
 
@@ -294,8 +291,7 @@ Wt.TL.plotD1 <- TL.WT %>%
   theme(plot.title = element_text(face = "bold", hjust = 0.5, size = (12))) + theme(axis.title = element_text(size = 12))+
   scale_colour_manual(values = c("New" = "deepskyblue", "Old" = "blue", "Older" = "red"))+
   scale_shape_manual(values = c("CT" = 2, "CN" = 5, "SD" = 0))+
-  theme(axis.title.x=element_blank(), axis.title.y=element_blank())+
-  stat_cor(aes(), color = "black", label.y.npc="top", label.x.npc = "left", geom = "label", size = 2.5)
+  theme(axis.title.x=element_blank(), axis.title.y=element_blank())
 
 Wt.TL.plotD19 <- TL.WT %>% 
   dplyr::filter(Age == "D19") %>% 
@@ -317,8 +313,7 @@ Wt.TL.plotD19 <- TL.WT %>%
   theme(plot.title = element_text(face = "bold", hjust = 0.5, size = (12))) + theme(axis.title = element_text(size = 12))+
   scale_colour_manual(values = c("New" = "deepskyblue", "Old" = "blue", "Older" = "red"))+
   scale_shape_manual(values = c("CT" = 2, "CN" = 5, "SD" = 0)) +
-  theme(axis.title.x=element_blank(), axis.title.y=element_blank())+
-  stat_cor(aes(), color = "black", label.y.npc="top", label.x.npc = "centre", geom = "label", size = 2.5)
+  theme(axis.title.x=element_blank(), axis.title.y=element_blank())
 
 Legend <- TL.WT %>% 
   dplyr::filter(Age == "D1") %>% 
@@ -359,6 +354,7 @@ Figure_annotated <- annotate_figure(Figure, bottom = text_grob("Dry weight", hju
 
 Figure_arranged <- grid.arrange(Figure_annotated, legend, nrow = 2, layout_matrix = rbind(c(1,1), c(3,3)),
                                 widths = c(2.7, 2.7), heights = c(2.5, 0.3))
+
 
 ggsave(plot = Figure_arranged, width = 7.0, height = 3.5, units = "in", dpi = 300,filename = "Figures/Weight_vs_TotalLipids_Correlation_plot.jpg")              
 
