@@ -207,66 +207,43 @@ Wt.plot <- DF.plot %>%
   facet_grid(~Age) +
   theme_bw()
 
-#___________ save data for the weight of each sample____________
+#__________Calculate total lipid titre and percent of fly weight due to lipid____________
 
-# Find mean weight and SE for each of the seven strain
-
-WeightsSE <- DF.main %>% 
+# Here we calc total lipid titre in mglipid/fly and SE for each strain and we calculate
+# percent of fly weight due to lipid and SE for each strain
+PLSE <- DF.main %>% 
+  ungroup %>%
   ungroup() %>%
   dplyr::filter(Samples != "ct_o225" & Samples != "syd_o169") %>% # remove weight outlier for Day 1
   dplyr::filter(Samples != "ct_o42" & Samples != "cbr_n43") %>% # remove weight outlier for Day 19 
   dplyr::filter(Samples != "cbr_n62" & Samples != "cbr_n86") %>% # remove weight outlier for Day 19 
   dplyr::filter(Samples != "syd_o22" & Samples != "syd_o76") %>% # remove weight outlier for Day 19
-  dplyr::select(Samples, Line, Age, Time, Weight) %>% 
-  unique() %>% 
-  group_by(Samples) %>% 
-  summarySE(groupvars = c("Line", "Time", "Age"), measurevar = "Weight") %>% 
-  ungroup() %>% 
-  tidyr::unite(LineTime, Line, Time, remove = FALSE) %>% 
-  dplyr::select(LineTime, Age, Weight, se) %>% 
-  dplyr::mutate(Wt = format(round(.$Weight, 2), nsmall = 2)) %>% 
-  dplyr::mutate(WT.se = format(round(.$se, 2), nsmall = 2)) %>% 
-  #tidyr::unite("WtSE", Wt:se, sep = "±") #%>% 
-  #tidyr::pivot_wider(id_cols = c(Age), names_from = LineTime, values_from = WtSE)
-  dplyr::select(1,2,5,6)
-
-
-#__________Calculate Total lipid titre in lipid/fly and SE for each strain_____________
-
-
-TLSE <- DF.main %>% 
-  ungroup %>%
   group_by(Samples) %>%
-  #mutate(LipidWT = (Conc*Weight*50)) %>% 
-  mutate(LipidWT = (Conc*Weight*50)*1e-6) %>%  #Convert from ng to mg
+  #mutate(LipidWT = (Conc*Weight*50)) %>% #LipidWT in ng/fly
+  mutate(LipidWT = (Conc*Weight*50)*1e-6) %>%  #Convert from ng to mg so LipidWt in mg/fly
   ungroup() %>% 
-  dplyr::group_by(Age,Samples) %>% 
+  dplyr::group_by(Samples) %>% 
   dplyr::mutate(Total.Lipid = sum(LipidWT)) %>% 
   dplyr::ungroup() %>% 
   dplyr::select(Samples, Line, Age, Time, Weight, Total.Lipid) %>% 
   unique() %>% 
-  group_by(Samples) %>% 
-  summarySE(groupvars = c("Line", "Time", "Age"), measurevar = "Total.Lipid") %>% 
+  dplyr::group_by(Samples) %>% 
+  dplyr::mutate(Percent = (as.numeric(Total.Lipid)/as.numeric(Weight)*100)) %>% 
   ungroup() %>% 
-  tidyr::unite(LineTime, Line, Time, remove = FALSE) %>%
-  dplyr::select(LineTime, Age, Total.Lipid, se) %>% 
-  dplyr::mutate(TL = format(round(.$Total.Lipid, 2), nsmall = 2)) %>% 
-  dplyr::mutate(TL.se = format(round(.$se, 2), nsmall = 2)) %>% 
-  #tidyr::unite("TLSE", Total.Conc:se, sep = "±")
-  dplyr::select(1,2,5,6)
-
-# Create a dataframe with total lipid + SE and Weight + SE 
-
-TL.WT <- cbind(WeightsSE, TLSE) %>% 
-  dplyr::select(-5,-6) %>% 
-  tidyr::separate(col = LineTime, into = c("Line", "Time"), "_", remove = TRUE) %>% 
-  dplyr::mutate(Wt = as.numeric(Wt), WT.se = as.numeric(WT.se), TL = as.numeric(TL), TL.se = as.numeric(TL.se)) %>% 
+  group_by(Line, Time, Age) %>% 
+  dplyr::summarise(TL=mean(Total.Lipid),TLSE = sd(Total.Lipid)/sqrt(length(Total.Lipid)),PL=mean(Percent),PLSE = sd(Percent)/sqrt(length(Percent))) %>%  
+  ungroup() %>% 
+  dplyr::mutate(TL = format(round(.$TL, 3), nsmall = 3)) %>% 
+  dplyr::mutate(TLSE = format(round(.$TLSE, 3), nsmall = 3)) %>% 
+  dplyr::mutate(PL = format(round(.$PL, 3), nsmall = 3)) %>% 
+  dplyr::mutate(PLSE = format(round(.$PLSE, 3), nsmall = 3)) %>% 
   dplyr::mutate(Age = replace(Age, Age == "1 Day", "D1")) %>% 
   dplyr::mutate(Age = replace(Age, Age == "19 Day", "D19")) %>% 
   dplyr::mutate(Line = replace(Line, Line == "s06", "SD")) %>% 
   dplyr::mutate(Line = replace(Line, Line == "cbr", "CN")) %>% 
   dplyr::mutate(Line = replace(Line, Line == "ct", "CT")) %>% 
-  dplyr::mutate(Line = replace(Line, Line == "syd", "SD")) 
+  dplyr::mutate(Line = replace(Line, Line == "syd", "SD"))  %>% 
+  tidyr::unite(LineTime, Line, Time, remove = FALSE) 
 
 #_____________make a correlation plot of weight vs total lipid titre_________
 
@@ -288,12 +265,13 @@ Wt.TL.plotD1 <- TL.WT %>%
   theme(legend.position="none")+
   theme(legend.text=element_text(size = 10))+
   theme(axis.title.y = element_text(face = "bold"), axis.title.x = element_text(face="bold")) + 
-  theme(axis.text.y = element_text(size = 12), axis.text.x = element_text(size = 12)) + 
+  theme(axis.text.y = element_text(size = 8), axis.text.x = element_text(size = 8)) + 
   theme(plot.title = element_text(face = "bold", hjust = 0.5, size = (12))) + theme(axis.title = element_text(size = 12))+
   scale_colour_manual(values = c("New" = "deepskyblue", "Old" = "blue", "Older" = "red"))+
-  ylim(expand = c(0, 0.50))+
   scale_shape_manual(values = c("CT" = 2, "CN" = 5, "SD" = 0))+
-  theme(axis.title.x=element_blank(), axis.title.y=element_blank())
+  theme(axis.title.x=element_blank(), axis.title.y=element_blank())+
+  stat_cor(aes(), color = "black", label.y.npc="top", label.x.npc = "left", geom = "label", size = 2.5) +
+  scale_y_continuous(limits = c(0, 0.025))
 
 Wt.TL.plotD19 <- TL.WT %>% 
   dplyr::filter(Age == "D19") %>% 
@@ -311,13 +289,15 @@ Wt.TL.plotD19 <- TL.WT %>%
   theme(legend.position="none")+
   theme(legend.text=element_text(size = 10))+
   theme(axis.title.y = element_text(face = "bold"), axis.title.x = element_text(face="bold")) + 
-  theme(axis.text.y = element_text(size = 12), axis.text.x = element_text(size = 12)) + 
+  theme(axis.text.y = element_text(size = 8), axis.text.x = element_text(size = 8)) + 
   theme(plot.title = element_text(face = "bold", hjust = 0.5, size = (12))) + theme(axis.title = element_text(size = 12))+
   scale_colour_manual(values = c("New" = "deepskyblue", "Old" = "blue", "Older" = "red"))+
   scale_shape_manual(values = c("CT" = 2, "CN" = 5, "SD" = 0)) +
-  theme(axis.title.x=element_blank(), axis.title.y=element_blank())
+  theme(axis.title.x=element_blank(), axis.title.y=element_blank()) +
+  stat_cor(aes(), color = "black", label.y.npc="top", label.x.npc = "left", geom = "label", size = 2.5)#+
+  #scale_y_continuous(labels = function(x) format(x, scientific = TRUE))
 
-Legend <- TL.WT %>% 
+Legend1 <- TL.WT %>% 
   dplyr::filter(Age == "D1") %>% 
   #ggplot(aes(Wt, log10(TL)))+ 
   ggplot(aes(Wt, TL))+ 
@@ -347,18 +327,18 @@ get_legend <- function(myggplot){
   return(legend)
 }
 
-legend <- get_legend(Legend)
+legend <- get_legend(Legend1)
 
-Figure <- ggarrange(Wt.TL.plotD1, Wt.TL.plotD19, ncol = 2)
+Figure1 <- ggarrange(Wt.TL.plotD1, Wt.TL.plotD19, ncol = 2)
 
-Figure_annotated <- annotate_figure(Figure, bottom = text_grob("Dry weight", hjust = 0.5, face = "bold", size = 12),
+Figure1_annotated <- annotate_figure(Figure1, bottom = text_grob("Dry weight", hjust = 0.5, face = "bold", size = 12),
                                     left = text_grob("Total lipid titre", rot = 90, face = "bold", size = 12))
 
-Figure_arranged <- grid.arrange(Figure_annotated, legend, nrow = 2, layout_matrix = rbind(c(1,1), c(3,3)),
+Figure1_arranged <- grid.arrange(Figure1_annotated, legend, nrow = 2, layout_matrix = rbind(c(1,1), c(3,3)),
                                 widths = c(2.7, 2.7), heights = c(2.5, 0.3))
 
 
-ggsave(plot = Figure_arranged, width = 7.0, height = 3.5, units = "in", dpi = 300,filename = "Figures/Weight_vs_TotalLipids_Correlation_plot.jpg")              
+ggsave(plot = Figure1_arranged, width = 7.0, height = 3.5, units = "in", dpi = 300,filename = "Figures/Weight_vs_TotalLipids_Correlation_plot in mg per fly.jpg")              
 
 
 #_________________________________________________________________________________________
@@ -369,7 +349,7 @@ ggsave(plot = Figure_arranged, width = 7.0, height = 3.5, units = "in", dpi = 30
 TL.P.WT <- cbind(WeightsSE, TLSE) %>% 
   dplyr::select(1,2,3,7) %>% 
   dplyr::mutate(Wt = as.numeric(Wt), TL = as.numeric(TL)) %>% 
-  dplyr::mutate(Percent = (as.numeric(TL)/as.numeric(Wt))) %>% 
+  dplyr::mutate(Percent = (as.numeric(TL)/as.numeric(Wt)*100)) %>% 
   #tidyr::separate(col = LineTime, into = c("Line", "Time"), "_", remove = TRUE) %>% 
   dplyr::mutate(Age = replace(Age, Age == "1 Day", "D1")) %>% 
   dplyr::mutate(Age = replace(Age, Age == "19 Day", "D19")) %>% 
@@ -388,61 +368,172 @@ TL.P.WT.plotD1 <- TL.P.WT %>%
   dplyr::filter(Age == "D1") %>% 
   dplyr::mutate(Strain = factor(as.factor(Strain), levels = c("CTnew","CTold", "SDnew","SDold","SDolder","CNnew","CNold"))) %>%
   ggplot(aes(Strain, Percent, colour = Strain))+ 
-  #geom_point(mapping = aes(colour = Time, shape = Line), size = 4, position = pd) +
+  geom_point(mapping = aes(), size = 4, position = pd) +
   theme_bw() +
   #geom_errorbar(aes(xmin = Wt-WT.se, xmax = Wt+WT.se, colour = Time), width =  0.0001, size  =  0.5, position = pd) +
   #geom_errorbar(aes(ymin=TL-TL.se, ymax=TL+TL.se,colour = Time), width =  0.0001, size  =  0.5, position = pd) +
   facet_grid(~ Age)+
   theme(strip.background =element_rect(fill="white"))+
   theme(strip.text = element_text(colour = 'Black', size = 10))+
-  xlab(paste0("Fly weight")) +
+  xlab(paste0("Strain")) +
   ylab(paste0("% fly weight due to lipids"))+
   theme(legend.position="none")+
   theme(legend.text=element_text(size = 10))+
   theme(axis.title.y = element_text(face = "bold"), axis.title.x = element_text(face="bold")) + 
-  theme(axis.text.y = element_text(size = 12), axis.text.x = element_text(size = 12)) + 
+  theme(axis.text.y = element_text(size = 8), axis.text.x = element_text(size = 8)) + 
   theme(plot.title = element_text(face = "bold", hjust = 0.5, size = (12))) + theme(axis.title = element_text(size = 12))+
   #scale_colour_manual(values = c("New" = "deepskyblue", "Old" = "blue", "Older" = "red"))+
   #scale_shape_manual(values = c("CT" = 2, "CN" = 5, "SD" = 0))+
-  theme(axis.title.x=element_blank(), axis.title.y=element_blank()) #+
-  #stat_cor(aes(), color = "black", label.y.npc="top", label.x.npc = "left", geom = "label", size = 2.5)
+  theme(axis.title.x=element_blank(), axis.title.y=element_blank()) 
 
 TL.P.WT.plotD19 <- TL.P.WT %>% 
   dplyr::filter(Age == "D19") %>% 
   dplyr::mutate(Strain = factor(as.factor(Strain), levels = c("CTnew","CTold", "SDnew","SDold","SDolder","CNnew","CNold"))) %>%
   ggplot(aes(Strain, Percent, colour = Strain))+ 
+  geom_point(mapping = aes(), size = 4, position = pd) +
+  theme_bw() +
+  #geom_errorbar(aes(xmin = Wt-WT.se, xmax = Wt+WT.se, colour = Time), width =  0.0001, size  =  0.5, position = pd) +
+  #geom_errorbar(aes(ymin=TL-TL.se, ymax=TL+TL.se,colour = Time), width =  0.0001, size  =  0.5, position = pd) +
+  facet_grid(~ Age)+
+  theme(strip.background =element_rect(fill="white"))+
+  theme(strip.text = element_text(colour = 'Black', size = 10))+
+  xlab(paste0("Strain")) +
+  ylab(paste0("% fly weight due to lipids"))+
+  theme(legend.position="none")+
+  theme(legend.text=element_text(size = 10))+
+  theme(axis.title.y = element_text(face = "bold"), axis.title.x = element_text(face="bold")) + 
+  theme(axis.text.y = element_text(size = 8), axis.text.x = element_text(size = 8)) + 
+  theme(plot.title = element_text(face = "bold", hjust = 0.5, size = (12))) + theme(axis.title = element_text(size = 12))+
+  #scale_colour_manual(values = c("New" = "deepskyblue", "Old" = "blue", "Older" = "red"))+
+  #scale_shape_manual(values = c("CT" = 2, "CN" = 5, "SD" = 0)) +
+  theme(axis.title.x=element_blank(), axis.title.y=element_blank())
+
+Legend2 <- TL.P.WT %>% 
+  dplyr::filter(Age == "D1") %>% 
+  dplyr::mutate(Strain = factor(as.factor(Strain), levels = c("CTnew","CTold", "SDnew","SDold","SDolder","CNnew","CNold"))) %>%
+  ggplot(aes(Strain, Percent, colour = Strain))+ 
+  geom_point(mapping = aes(), size = 4, position = pd) +
+  #geom_errorbar(aes(xmin = Wt-WT.se, xmax = Wt+WT.se, colour = Time), width =  0.01, size  =  0.5, position = pd) +
+  #geom_errorbar(aes(ymin=TL-TL.se, ymax=TL+TL.se,colour = Time), width =  0.01, size  =  0.5, position = pd) +
+  facet_grid(~ Age)+
+  theme(strip.background =element_rect(fill="white"))+
+  theme(strip.text = element_text(colour = 'Black', size =10))+
+  xlab(paste0("Strain")) +
+  ylab(paste0("% fly weight due to lipids"))+
+  theme(legend.position="bottom")+
+  theme(legend.text=element_text(size = 10))+
+  theme(axis.title.y = element_text(face = "bold"), axis.title.x = element_text(face="bold")) + 
+  theme(axis.text.y = element_text(size = 12), axis.text.x = element_text(size = 12)) + 
+  theme(plot.title = element_text(face = "bold", hjust = 0.5, size = (12))) + 
+  theme(axis.title = element_text(size = 12))#+
+  #scale_colour_manual(values = c("New" = "deepskyblue", "Old" = "blue", "Older" = "red"))+
+  #scale_shape_manual(values = c("CT" = 2, "CN" = 5, "SD" = 0))
+
+#Arrange and save the correlation plots for DB
+
+get_legend <- function(myggplot){
+  tmp <- ggplot_gtable(ggplot_build(myggplot))
+  leg <- which(sapply(tmp$grobs, function(x) x$name) == "guide-box")
+  legend <- tmp$grobs[[leg]]
+  return(legend)
+}
+
+legend <- get_legend(Legend2)
+
+Figure2 <- ggarrange(TL.P.WT.plotD1, TL.P.WT.plotD19, ncol = 2)
+
+Figure2_annotated <- annotate_figure(Figure2, bottom = text_grob("Strain", hjust = 0.5, face = "bold", size = 12),
+                                    left = text_grob("Lipid weight (%)", rot = 90, face = "bold", size = 12))
+
+Figure2_arranged <- grid.arrange(Figure2_annotated, legend, nrow = 2, layout_matrix = rbind(c(1,1), c(3,3)),
+                                widths = c(2.7, 2.7), heights = c(2.5, 0.3))
+
+ggsave(plot = Figure2_arranged, width = 7.5, height = 3.5, units = "in", dpi = 300,filename = "Figures/Percent of fly weight due to lipids.jpg")              
+
+
+#_______________________________________________________________________________________________
+
+
+#____________________Plot the percent of lipid weight vs fly weight_______________________________
+
+P.WT_WT <- cbind(WeightsSE, TLSE) %>% 
+  dplyr::select(1,2,3,4,7) %>% 
+  dplyr::mutate(Wt = as.numeric(Wt), WT.se = as.numeric(WT.se), TL = as.numeric(TL)) %>% 
+  dplyr::mutate(Percent = (as.numeric(TL)/as.numeric(Wt)*100)) %>% 
+  tidyr::separate(col = LineTime, into = c("Line", "Time"), "_", remove = TRUE) %>% 
+  dplyr::mutate(Age = replace(Age, Age == "1 Day", "D1")) %>% 
+  dplyr::mutate(Age = replace(Age, Age == "19 Day", "D19")) %>% 
+  dplyr::mutate(Line = replace(Line, Line == "s06", "SD")) %>% 
+  dplyr::mutate(Line = replace(Line, Line == "cbr", "CN")) %>% 
+  dplyr::mutate(Line = replace(Line, Line == "ct", "CT")) %>% 
+  dplyr::mutate(Line = replace(Line, Line == "syd", "SD")) 
+
+
+pd = position_dodge(0.4)
+
+arrows1 <- P.WT_WT %>% dplyr::filter(Age == "D1") %>% 
+  dplyr::select(Line, Time, mean1, mean2) %>%
+  pivot_wider(names_from = Time, values_from = c(mean1,mean2)) %>%
+  dplyr::rename(x_start = mean1_New, x_end = mean1_Old, y_start = mean2_New, y_end = mean2_Old)
+
+P.WT_WT.D1 <- P.WT_WT %>% 
+  dplyr::filter(Age == "D1") %>% 
+  ggplot(aes(Wt, Percent))+ 
   geom_point(mapping = aes(colour = Time, shape = Line), size = 4, position = pd) +
   theme_bw() +
   geom_errorbar(aes(xmin = Wt-WT.se, xmax = Wt+WT.se, colour = Time), width =  0.0001, size  =  0.5, position = pd) +
-  geom_errorbar(aes(ymin=TL-TL.se, ymax=TL+TL.se,colour = Time), width =  0.0001, size  =  0.5, position = pd) +
+  #geom_errorbar(aes(ymin=Percent-P.se, ymax=Percent+P.se,colour = Time), width =  0.0001, size  =  0.5, position = pd) +
   facet_grid(~ Age)+
   theme(strip.background =element_rect(fill="white"))+
   theme(strip.text = element_text(colour = 'Black', size = 10))+
   xlab(paste0("Fly weight")) +
-  ylab(paste0("Total lipids"))+
+  ylab(paste0("Lipid weight (%)"))+
   theme(legend.position="none")+
   theme(legend.text=element_text(size = 10))+
   theme(axis.title.y = element_text(face = "bold"), axis.title.x = element_text(face="bold")) + 
-  theme(axis.text.y = element_text(size = 12), axis.text.x = element_text(size = 12)) + 
+  theme(axis.text.y = element_text(size = 8), axis.text.x = element_text(size = 8)) + 
   theme(plot.title = element_text(face = "bold", hjust = 0.5, size = (12))) + theme(axis.title = element_text(size = 12))+
   scale_colour_manual(values = c("New" = "deepskyblue", "Old" = "blue", "Older" = "red"))+
-  scale_shape_manual(values = c("CT" = 2, "CN" = 5, "SD" = 0)) +
-  theme(axis.title.x=element_blank(), axis.title.y=element_blank())+
-  stat_cor(aes(), color = "black", label.y.npc="top", label.x.npc = "centre", geom = "label", size = 2.5)
+  scale_shape_manual(values = c("CT" = 2, "CN" = 5, "SD" = 0))+
+  theme(axis.title.x=element_blank(), axis.title.y=element_blank()) +
+  geom_segment(data = reshape(P.WT_WT, v.names="Time", idvar = "Wt", timevar = "Time", direction = "wide"),
+               aes(x=Wt, xend=Wt, y=TL, yend=TL), size = 2,
+               arrow = arrow(length = unit(0.5, "cm")))
+ # stat_cor(aes(), color = "black", label.y.npc="top", label.x.npc = "left", geom = "label", size = 2.5) 
+  
 
-Legendp <- TL.P.WT %>% 
-  dplyr::filter(Age == "D1") %>% 
-  #ggplot(aes(Wt, log10(TL)))+ 
-  ggplot(aes(Wt, TL))+ 
+P.WT_WT.D19 <- P.WT_WT  %>% 
+  dplyr::filter(Age == "D19") %>% 
+  ggplot(aes(Wt, Percent))+ 
   geom_point(mapping = aes(colour = Time, shape = Line), size = 4, position = pd) +
   theme_bw() +
-  geom_errorbar(aes(xmin = Wt-WT.se, xmax = Wt+WT.se, colour = Time), width =  0.01, size  =  0.5, position = pd) +
-  geom_errorbar(aes(ymin=TL-TL.se, ymax=TL+TL.se,colour = Time), width =  0.01, size  =  0.5, position = pd) +
+  geom_errorbar(aes(xmin = Wt-WT.se, xmax = Wt+WT.se, colour = Time), width =  0.0001, size  =  0.5, position = pd) +
+  #geom_errorbar(aes(ymin=Percent-P.se, ymax=Percent+P.se,colour = Time), width =  0.0001, size  =  0.5, position = pd) +
   facet_grid(~ Age)+
   theme(strip.background =element_rect(fill="white"))+
+  theme(strip.text = element_text(colour = 'Black', size = 10))+
+  xlab(paste0("Fly weight")) +
+  ylab(paste0("Lipid weight (%)"))+
+  theme(legend.position="none")+
+  theme(legend.text=element_text(size = 10))+
+  theme(axis.title.y = element_text(face = "bold"), axis.title.x = element_text(face="bold")) + 
+  theme(axis.text.y = element_text(size = 8), axis.text.x = element_text(size = 8)) + 
+  theme(plot.title = element_text(face = "bold", hjust = 0.5, size = (12))) + theme(axis.title = element_text(size = 12))+
+  scale_colour_manual(values = c("New" = "deepskyblue", "Old" = "blue", "Older" = "red"))+
+  scale_shape_manual(values = c("CT" = 2, "CN" = 5, "SD" = 0))+
+  theme(axis.title.x=element_blank(), axis.title.y=element_blank())
+
+Legend3 <- P.WT_WT %>% 
+  dplyr::filter(Age == "D1") %>% 
+  ggplot(aes(Wt, Percent))+ 
+  geom_point(mapping = aes(colour = Time, shape = Line), size = 4, position = pd) +
+  theme_bw() +
+  geom_errorbar(aes(xmin = Wt-WT.se, xmax = Wt+WT.se, colour = Time), width =  0.0001, size  =  0.5, position = pd) +
+  #geom_errorbar(aes(ymin=Percent-P.se, ymax=Percent+P.se,colour = Time), width =  0.0001, size  =  0.5, position = pd) +
+  theme(strip.background =element_rect(fill="white"))+
   theme(strip.text = element_text(colour = 'Black', size =10))+
-  xlab(paste0("Dry weight")) +
-  ylab(paste0("Total lipid titre"))+
+  xlab(paste0("Fly weight")) +
+  ylab(paste0("Lipid weight (%)"))+
   theme(legend.position="bottom")+
   theme(legend.text=element_text(size = 10))+
   theme(axis.title.y = element_text(face = "bold"), axis.title.x = element_text(face="bold")) + 
@@ -460,17 +551,26 @@ get_legend <- function(myggplot){
   return(legend)
 }
 
-legend <- get_legend(Legend)
+legend <- get_legend(Legend3)
 
-Figure_p <- ggarrange(Wt.TL.plotD1, Wt.TL.plotD19, ncol = 2)
+Figure3 <- ggarrange(P.WT_WT.D1, P.WT_WT.D19, ncol = 2)
 
-Figurep_annotated <- annotate_figure(Figure_p, bottom = text_grob("Dry weight", hjust = 0.5, face = "bold", size = 12),
-                                    left = text_grob("Total lipid titre", rot = 90, face = "bold", size = 12))
+Figure3_annotated <- annotate_figure(Figure3, bottom = text_grob("Dry weight (mg)", hjust = 0.5, face = "bold", size = 12),
+                                    left = text_grob("Lipid weight (%)", rot = 90, face = "bold", size = 12))
 
-Figurep_arranged <- grid.arrange(Figurep_annotated, legend, nrow = 2, layout_matrix = rbind(c(1,1), c(3,3)),
+Figure3_arranged <- grid.arrange(Figure3_annotated, legend, nrow = 2, layout_matrix = rbind(c(1,1), c(3,3)),
                                 widths = c(2.7, 2.7), heights = c(2.5, 0.3))
 
-ggsave(plot = Figurep_arranged, width = 7.0, height = 3.5, units = "in", dpi = 300,filename = "Figures/Percent of l=fly weight due to lipids.jpg")              
+
+ggsave(plot = Figure3_arranged, width = 7.0, height = 3.5, units = "in", dpi = 300,filename = "Figures/Weight weight vs dry fly weight.jpg")              
+
+# Day1 <- TL.P.WT %>% 
+#   #dplyr::mutate(Strain = factor(as.factor(Strain), levels = c("CTnew","CTold", "SDnew","SDold","SDolder","CNnew","CNold"))) %>%
+#   ggplot(aes(Wt, Percent))+ 
+#   geom_point(mapping = aes(colour = Strain), size = 4, position = pd) +
+#   theme_bw() +
+#   facet_grid(~ Age)
 
 
 #________________________________________END_________________________________________
+
