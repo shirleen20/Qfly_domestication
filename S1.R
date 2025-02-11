@@ -1,7 +1,8 @@
-#______________________________________24/01/2025_______________________________
+#_________________________________________24/01/2025____________________________________
 
-# Here we calculate fly weight weight differences and plot dry weight vs total lipid titre for 
-# the seven strains to generate Figure S1, Table S3, and Dataset S1.
+# Here we calculate diversities, abundances, mean Carbon and mean double bond content
+# in the seven strains to generate Figure 1, Table S3-S6 and we make correlation plots
+# to generate Figure 6 and Figure S2
 
 library("tidyverse")
 library("ggrepel")
@@ -9,7 +10,7 @@ library("ggpubr")
 library("readxl")
 library("gtools")
 library("Rmisc")
-library("gridExtra")
+
 
 rm(list=ls())
 
@@ -23,7 +24,9 @@ ALS <- read_csv("data/Lipids to filter ploty.csv") %>%
   dplyr::select(3) %>% 
   unique() %>% 
   c()
+
 #______________ Load samples and remove outliers from batch02 ______________________________
+
 # correct names of incorrectly labeled sample names
 '%!in%' <- function(x,y)!('%in%'(x,y)) # a function to create opposite of %in% for filtering out
 
@@ -119,7 +122,11 @@ DF <- DF1 %>%
   dplyr::mutate(Time = replace(Time, Line == "s06", "Older")) %>% 
   dplyr::select(-count, -class) %>% 
   tidyr::separate(col = species, into = c("Carbon", NA), ":", remove = FALSE) %>% 
-  mutate(Carbon = as.double(Carbon))
+  mutate(Carbon = as.double(Carbon))%>% 
+  dplyr::filter(Samples != "ct_o225" & Samples != "syd_o169") %>% # remove weight outlier for Day 1
+  dplyr::filter(Samples != "ct_o42" & Samples != "cbr_n43") %>% # remove weight outlier for Day 19 
+  dplyr::filter(Samples != "cbr_n62" & Samples != "cbr_n86") %>% # remove weight outlier for Day 19 
+  dplyr::filter(Samples != "syd_o22" & Samples != "syd_o76") # remove weight outlier for Day 19 
 
 #___________________
 
@@ -158,403 +165,910 @@ DF.main <- DF %>%
   mutate(Conc = 10^((log10(N.Area)-Intercept)/Slope)) %>%
   mutate(LogAreaCheck = Intercept + Slope*(log10(Conc)), AreaCheck = 10^LogAreaCheck) ### Just to double check
 
+#__________________________Calc conc of each lipid species in each sample____________________________________
 
-#______________Make weight plots to identify samples with weight outliers______________________
-
-# Histogram
-
-DF.main %>% 
-  dplyr::select(Samples, Line, Weight, Age, Time) %>% 
-  tidyr::unite(LineTime, Line, Time, remove = FALSE) %>% 
+DFConc1 <- DF.main %>% 
+  ungroup %>% 
+  dplyr::select(Samples, SubClass, Name, Conc) %>% 
   unique() %>% 
-  dplyr::mutate(LineTime = factor(as.factor(LineTime), levels = c("ct_New","ct_Old","cbr_New","cbr_Old","syd_New","syd_Old","s06_Older"))) %>%
-  Rmisc::summarySE(measurevar = "Weight", groupvars = c("LineTime", "Age")) %>% 
-  ggplot(aes(LineTime, Weight, fill = LineTime)) +
-  geom_col(position = position_dodge()) +
-  geom_errorbar(aes(ymin = Weight - se, ymax = Weight + se), 
-                position = position_dodge(0.8),
-                width = 0.5)+
-  facet_wrap(~Age)+
-  theme_bw()+
-  ggtitle("Weight distribution in wild and domesticated Qfly strains" )+
-  labs(x= "Qfly strains", y = "Weight")+
-  theme(axis.title.y = element_text(face = "bold"), axis.title.x = element_text(face="bold"))+
-  theme(legend.position = "bottom") + guides(fill=guide_legend(nrow=1))+
-  theme(plot.title = element_text(face = "bold", hjust = 0.5, size = (12))) + 
-  theme(axis.title = element_text(size = 12))
+  pivot_wider(names_from = c(Samples), values_from = Conc) 
+
+#__________________________Percent abundance in the seven strains_______________________________
+
+# Calculate percentage conc and number of lipid species detected in each of the seven lines
+
+# complete fxn fills in zeros for samples that have missing lipids
+
+Complete_DF <- DF.main %>% ungroup() %>% 
+  complete(SubClass, nesting(Samples, Age, Line, Time, Weight), fill = list(Conc = 0)) %>%
+  dplyr::select(Samples, Age, Line, Time, SubClass, Conc, Weight)
 
 
-#_____________label outliers in the weight plot_____________
-
-DF.plot <- DF.main %>% 
-  dplyr::select(Samples, Line, Time, Age, Weight) %>% 
-  tidyr::unite(LineTime, Line, Time, remove = FALSE) %>% 
-  dplyr::select(-Line,-Time) %>%
+DF01 <- Complete_DF %>% 
+  ungroup %>% 
+  dplyr::group_by(Samples,SubClass) %>% 
+  dplyr::mutate(Total.Conc.by.SAsC = sum(Conc)) %>% # by samples, age and subclass 
+  dplyr::ungroup() %>% 
+  dplyr::group_by(Samples) %>% 
+  dplyr::mutate(Total.Conc.by.SA = sum(Conc)) %>% 
+  dplyr::select(-Conc) %>%
+  dplyr::ungroup() %>% 
+  dplyr::select(Samples, Age, Line, Time, SubClass, Total.Conc.by.SAsC, Total.Conc.by.SA) %>%
+  dplyr::mutate(Percentage = (Total.Conc.by.SAsC/Total.Conc.by.SA)*100) %>% 
   unique() %>% 
-  group_by(LineTime, Age) %>% 
-  dplyr::mutate(outlier = ifelse(is_outlier(Weight), Weight, as.numeric(NA))) %>% 
-  ungroup()
+  #run the codes till unique:total percentage should come to 100 for each individual sample to check: sum((DF01 %>% filter(Samples == "cbr_n04"))$Percentage)
+  dplyr::select(-Total.Conc.by.SAsC, -Total.Conc.by.SA, -Samples) %>%
+  summarySE(groupvars = c("Line", "Time", "Age", "SubClass"), measurevar = "Percentage") %>% 
+  dplyr::select(Line, Time, Age, SubClass, Percentage, se)
 
-Wt.plot <- DF.plot %>% 
-  ggplot(aes(LineTime, Weight, label = Samples))+
-  geom_boxplot(outlier.color = "Red") +
-  ggrepel::geom_text_repel(data = (DF.plot %>% drop_na() %>% unique()),
-                           aes(label = Samples),
-                           na.rm = TRUE,
-                           color = "Red") +
-  stat_summary(fun=mean, colour="red", geom="point",
-               shape=18, size=3) +
-  facet_grid(~Age) +
-  theme_bw()
+# Check to see if % adds to 100 for an individual sample, run the above codes till unique() the total % should come to 100. 
+sum((DF01 %>% dplyr::filter(Samples == "s06_02"))$Percentage) #Note this works if you run codes till unique() for object DF01
 
-#__________Calculate total lipid titre and percent of fly weight due to lipid____________
+# Check to see if percentage adds to 100 for a Line, Age, Time
+DF01 %>% 
+  dplyr::filter(Line == "ct" & Time == "New" & Age == "19 Day") %>% 
+  dplyr::select(Percentage) %>% 
+  sum()
 
-# Here we calc total lipid titre in mglipid/fly and SE for each strain and we calculate
-# percent of fly weight due to lipid and SE for each strain
-
-
-#_______ First remake DF.new by removing weight outliers from DF.main___________
-
-DF.new <- DF.main %>% 
-  dplyr::filter(Samples != "ct_o225" & Samples != "syd_o169") %>% # remove weight outlier for Day 1
-  dplyr::filter(Samples != "ct_o42" & Samples != "cbr_n43") %>% # remove weight outlier for Day 19 
-  dplyr::filter(Samples != "cbr_n62" & Samples != "cbr_n86") %>% # remove weight outlier for Day 19 
-  dplyr::filter(Samples != "syd_o22" & Samples != "syd_o76") # remove weight outlier for Day 19 
+# format and save as csv to produce Table S4
+DF00 <- DF01 %>% 
+  dplyr::mutate(Percentage = format(round(.$Percentage, 2), nsmall = 2)) %>% 
+  dplyr::mutate(se = format(round(.$se, 2), nsmall = 2)) %>% 
+  tidyr::unite("PeSE", Percentage:se, sep = "±") %>% 
+  tidyr::unite("Strain", Line:Time, sep = "") %>%
+  pivot_wider(names_from = c(Strain, Age), values_from = PeSE) %>% 
+  dplyr::select(SubClass, "ctNew_1 Day","ctNew_19 Day", "ctOld_1 Day", "ctOld_19 Day", "cbrNew_1 Day", "cbrNew_19 Day", 
+                "cbrOld_1 Day", "cbrOld_19 Day", "sydNew_1 Day", "sydNew_19 Day", "sydOld_1 Day", "sydOld_19 Day", 
+                "s06Older_1 Day", "s06Older_19 Day") #%>% 
+#write.csv("ScriptManuscript2/MainTables/Lipid percent abundance each class in the seven strains.csv")
 
 
-TL.WT <- DF.new %>% 
-  ungroup %>%
-  group_by(Samples) %>%
-  #mutate(LipidWT = (Conc*Weight*50)) %>% #LipidWT in ng/fly
+# Find the number of different lipid species present in each population at each age
+
+unique(DF$SubClass)
+#"TG"   "PC"   "PE"   "CL"   "PE p" "PS"   "LPC"  "PE e" "PI"   "PG"   "PC e" "TG e" "DG"   "DG e" "PS e"
+
+Lipid.species <- DF %>% 
+  ungroup() %>% 
+  dplyr::filter(Line == "s06" & Age == "19 Day") %>% # for all the other lines
+  dplyr::filter(SubClass == "TG e") %>% 
+  dplyr::select(Name) %>%
+  unique() %>% 
+  dplyr::summarise(count = n()) 
+
+# format and save as csv to produce Table S4
+
+DF02 <- DF.main %>% 
+  ungroup %>% 
+  dplyr::select(Line, Time, Age, SubClass, Name) %>% 
+  unique() %>% 
+  summarySE(groupvars = c("Line", "Time", "Age", "SubClass"), measurevar = "Name") %>% 
+  dplyr::select(Line, Time, Age, SubClass, N) %>% 
+  tidyr::unite("Strain", Line:Time, sep = "") %>%
+  pivot_wider(names_from = c(Strain, Age), values_from = N) %>% 
+  dplyr::select(SubClass, "ctNew_1 Day","ctNew_19 Day", "ctOld_1 Day", "ctOld_19 Day", "cbrNew_1 Day", "cbrNew_19 Day", 
+                "cbrOld_1 Day", "cbrOld_19 Day", "sydNew_1 Day", "sydNew_19 Day", "sydOld_1 Day", "sydOld_19 Day", 
+                "s06Older_1 Day", "s06Older_19 Day") #%>% 
+#write.csv("ScriptManuscript2/MainTables/Lipid diversity each class in the seven strains.csv")
+
+
+#___________________________Calculate total lipid titre in each strain__________________________________________
+
+DF03 <- DF.main %>% 
+  ungroup %>% 
+  dplyr::group_by(Samples) %>% 
   mutate(LipidWT = (Conc*Weight*50)*1e-6) %>%  #Convert from ng to mg so LipidWt in mg/fly
   ungroup() %>% 
   dplyr::group_by(Samples) %>% 
   dplyr::mutate(Total.Lipid = sum(LipidWT)) %>% 
   dplyr::ungroup() %>% 
   dplyr::select(Samples, Line, Age, Time, Weight, Total.Lipid) %>% 
+  tidyr::unite(LineTime, Line, Time, remove = FALSE) %>%
   unique() %>% 
-  dplyr::group_by(Samples) %>% 
-  dplyr::mutate(Percent = (as.numeric(Total.Lipid)/as.numeric(Weight)*100)) %>% 
+  summarySE(groupvars = c("Line", "Time", "Age"), measurevar = "Total.Lipid") %>% 
+  dplyr::select(Line, Time, Age, Total.Lipid, se)
+
+
+# format and save as csv for total lipid titre in mg/fly in Table S3
+
+DF03A <- DF03 %>% 
+  dplyr::mutate(Total.Lipid = format(round(.$Total.Lipid, 2), nsmall = 2)) %>% 
+  dplyr::mutate(se = format(round(.$se, 2), nsmall = 2)) %>% 
+  tidyr::unite("TLSE", Total.Lipid:se, sep = "±") %>% 
+  tidyr::unite("Strain", Line:Time, sep = "") %>%
+  pivot_wider(names_from = c(Strain, Age), values_from = TLSE) %>% 
+  dplyr::select("ctNew_1 Day","ctNew_19 Day", "ctOld_1 Day", "ctOld_19 Day", "sydNew_1 Day", "sydNew_19 Day", "sydOld_1 Day", "sydOld_19 Day", 
+                "s06Older_1 Day", "s06Older_19 Day", "cbrNew_1 Day", "cbrNew_19 Day", 
+                "cbrOld_1 Day", "cbrOld_19 Day") #%>% 
+# write.csv("ScriptManuscript2/MainTables/Total lipid titre in mg per fly in the seven strains.csv")
+
+
+#_____________________Calculate percent lipid abundance in each category for each strain_____________________________
+
+# add another column to DF that has the following 4 lipid categories
+PLs <- c("CL","PC", "PE", "PG", "PI", "PS","LPC")
+NLs <- c("DG", "TG")
+ELPLs <- c("PC e", "PE e", "PE p", "PS e")
+ELNLs <- c("DG e", "TG e")
+
+#__________
+
+DF04 <- Complete_DF %>% 
+  ungroup %>% 
+  dplyr::mutate(Type = ifelse(SubClass %in% PLs,"PLs", 
+                              ifelse(SubClass %in% ELPLs,"ELPLs", ifelse(SubClass %in% ELNLs,"ELNLs", "NLs")))) %>%  
+  dplyr::group_by(Samples,Type) %>% 
+  dplyr::mutate(Total.Conc.by.Type = sum(Conc)) %>% # by samples, age and type
+  dplyr::ungroup() %>% 
+  dplyr::group_by(Samples) %>%
+  dplyr::mutate(Total.Conc.by.SA = sum(Conc)) %>% 
+  dplyr::select(-Conc) %>%
+  dplyr::ungroup() %>% 
+  dplyr::select(Samples, Weight, Age, Line, Time,  Type, Total.Conc.by.Type, Total.Conc.by.SA) %>%
+  dplyr::mutate(Percentage = (Total.Conc.by.Type/Total.Conc.by.SA)*100) %>% 
+  unique() %>%
+  #run the codes till unique:total percentage should come to 100 for each individual sample to check: sum((DF04 %>% filter(Samples == "cbr_n04"))$Percentage)
+  dplyr::select(-Total.Conc.by.Type, -Total.Conc.by.SA) %>%
+  summarySE(groupvars = c("Line", "Time", "Age", "Type"), measurevar = "Percentage") %>% 
+  dplyr::select(Line, Time, Age, Type, Percentage, se)
+
+# Check to see if percentage adds to 100 for a Line, Age, Time
+
+DF04 %>% 
+  dplyr::filter(Line == "ct" & Time == "New" & Age == "19 Day") %>% 
+  dplyr::select(Percentage) %>% 
+  sum()
+
+# format and save as csv to produce Table S3
+DF04A <- DF04 %>% 
+  dplyr::mutate(Percentage = format(round(.$Percentage, 2), nsmall = 2)) %>% 
+  dplyr::mutate(se = format(round(.$se, 2), nsmall = 2)) %>% 
+  tidyr::unite("PeSE", Percentage:se, sep = "±") %>% 
+  tidyr::unite("Strain", Line:Time, sep = "") %>%
+  pivot_wider(names_from = c(Strain, Age), values_from = PeSE) %>% 
+  dplyr::select(Type, "ctNew_1 Day","ctNew_19 Day", "ctOld_1 Day", "ctOld_19 Day", "cbrNew_1 Day", "cbrNew_19 Day", 
+                "cbrOld_1 Day", "cbrOld_19 Day", "sydNew_1 Day", "sydNew_19 Day", "sydOld_1 Day", "sydOld_19 Day", 
+                "s06Older_1 Day", "s06Older_19 Day") #%>% 
+#write.csv("ScriptManuscript2/MainTables/Lipid percent abundance each category in the seven strains.csv")
+
+
+#______________________________Calculate lipid diversity in each category_________________________________________
+
+# format and save as csv to produce Table S3 lipid diversity
+
+DF04B <- DF.main %>% 
+  ungroup %>% 
+  dplyr::mutate(Type = ifelse(SubClass %in% PLs,"PLs", 
+                              ifelse(SubClass %in% ELPLs,"ELPLs", ifelse(SubClass %in% ELNLs,"ELNLs", "NLs")))) %>%  
+  dplyr::select(Line, Time, Age, Type, Name) %>% 
+  unique() %>% 
+  summarySE(groupvars = c("Line", "Time", "Age", "Type"), measurevar = "Name") %>% 
+  dplyr::select(Line, Time, Age, Type, N) %>% 
+  tidyr::unite("Strain", Line:Time, sep = "") %>%
+  pivot_wider(names_from = c(Strain, Age), values_from = N) %>% 
+  dplyr::select(Type, "ctNew_1 Day","ctNew_19 Day", "ctOld_1 Day", "ctOld_19 Day", "cbrNew_1 Day", "cbrNew_19 Day", 
+                "cbrOld_1 Day", "cbrOld_19 Day", "sydNew_1 Day", "sydNew_19 Day", "sydOld_1 Day", "sydOld_19 Day", 
+                "s06Older_1 Day", "s06Older_19 Day") #%>% 
+#write.csv("ScriptManuscript2/MainTables/Lipid diversity each category in the seven strains.csv")
+
+
+#________________________Calculate PE/PC Ratio _____________________________________
+
+# format and save as csv to produce Table S4 PE/PC ratio
+
+DF05 <- DF.main %>%
   ungroup() %>% 
-  group_by(Line, Time, Age) %>% 
-  dplyr::summarise(TL=mean(Total.Lipid),TLSE = sd(Total.Lipid)/sqrt(length(Total.Lipid)),
-                   PL=mean(Percent),PLSE = sd(Percent)/sqrt(length(Percent)),
-                   WT=mean(Weight),WTSE = sd(Weight)/sqrt(length(Weight))) %>%  
-  ungroup() %>% 
-  dplyr::mutate(TL = format(round(.$TL, 3), nsmall = 3)) %>% 
-  dplyr::mutate(TLSE = format(round(.$TLSE, 3), nsmall = 3)) %>% 
-  dplyr::mutate(PL = format(round(.$PL, 3), nsmall = 3)) %>% 
-  dplyr::mutate(PLSE = format(round(.$PLSE, 3), nsmall = 3)) %>% 
-  dplyr::mutate(WT = format(round(.$WT, 3), nsmall = 3)) %>% 
-  dplyr::mutate(WTSE = format(round(.$WTSE, 3), nsmall = 3)) %>% 
-  dplyr::mutate(Age = replace(Age, Age == "1 Day", "D1")) %>% 
-  dplyr::mutate(Age = replace(Age, Age == "19 Day", "D19")) %>% 
-  dplyr::mutate(Line = replace(Line, Line == "s06", "SD")) %>% 
-  dplyr::mutate(Line = replace(Line, Line == "cbr", "CN")) %>% 
-  dplyr::mutate(Line = replace(Line, Line == "ct", "CT")) %>% 
-  dplyr::mutate(Line = replace(Line, Line == "syd", "SD"))  %>% 
-  tidyr::unite(LineTime, Line, Time, remove = FALSE) %>% 
-  dplyr::mutate(TL = as.numeric(TL), TLSE = as.numeric(TLSE), 
-                PL = as.numeric(PL), PLSE = as.numeric(PLSE),
-                WT = as.numeric(WT), WTSE = as.numeric(WTSE)) 
+  dplyr::select(Samples, Line, SubClass, Age, Time, Conc) %>% 
+  dplyr::filter(SubClass %in% c("PE", "PC")) %>% 
+  dplyr::group_by(Samples, SubClass) %>%
+  dplyr::mutate(S.Conc.C = sum(Conc)) %>%
+  dplyr::ungroup() %>% 
+  dplyr::select(-Conc) %>% 
+  unique() %>% 
+  tidyr::pivot_wider(values_from = S.Conc.C, names_from = SubClass) %>% 
+  dplyr::mutate(Ratio1 = PE/PC) %>%
+  unique() %>% 
+  dplyr::select(-PC, -PE) %>% 
+  summarySE(groupvars = c("Line", "Time", "Age"), measurevar = "Ratio1") %>% 
+  dplyr::select(Line, Time, Age, Ratio1, se) %>% 
+  mutate(Ratio1 = format(round(.$Ratio1, 1), nsmall = 1)) %>% 
+  mutate(se = format(round(.$se, 1), nsmall = 1)) %>% 
+  tidyr::unite("PEPC", Ratio1:se, sep = "±") %>% 
+  tidyr::unite("Strain", Line:Time, sep = "") %>%
+  pivot_wider(names_from = c(Strain, Age), values_from = PEPC) %>% 
+  dplyr::select("ctNew_1 Day","ctNew_19 Day", "ctOld_1 Day", "ctOld_19 Day", "cbrNew_1 Day", "cbrNew_19 Day", 
+                "cbrOld_1 Day", "cbrOld_19 Day", "sydNew_1 Day", "sydNew_19 Day", "sydOld_1 Day", "sydOld_19 Day", 
+                "s06Older_1 Day", "s06Older_19 Day") #%>%
+# write.csv("ScriptManuscript2/MainTables/PEPC ratio in the seven strains.csv")
 
-#_____________make a correlation plot of weight vs total lipid titre_________
 
-pd = position_dodge(0.0005)
 
-WT.TL_D1 <- TL.WT %>% 
-  dplyr::filter(Age == "D1") %>% 
-  ggplot(aes(WT, TL))+ 
-  geom_point(mapping = aes(colour = Time, shape = Line), size = 4, position = pd) +
-  theme_bw() +
-  geom_errorbar(aes(xmin = WT-WTSE, xmax = WT+WTSE, colour = Time), width =  0.0001, size  =  0.5, position = pd) +
-  geom_errorbar(aes(ymin=TL-TLSE, ymax=TL+TLSE,colour = Time), width =  0.0001, size  =  0.5, position = pd) +
-  facet_grid(~ Age)+
+#______________Calculate average number of carbon and double bond in lipid category/class__________________
+
+# First remove subclasses PSe and DGe from DF because these two classes have all lipid species that do not have acyl chain identified
+
+DFnew <- DF.main %>% 
+  dplyr::filter(SubClass != "PS e" & SubClass != "DG e")
+
+#grep - finds things, gives index 1, 3, 5 not showing 1 is apple, 3 is pear uless you specify value =T) check help ?gsub or grep
+#gsub is a substitution
+
+### Function to create for each subclass data frame, all side chains separated into columns
+# X = data frame to process
+# Y = Subclass level as string
+
+F1 <- function(X, Y){
+  Subclass <- X %>% 
+    filter(SubClass == Y)
+  length1 <- length(Subclass)  # The starting number of columns
+  Names <- colnames(Subclass) # Save column names
+  Subclass_SC <- gsub(".*\\((.+)\\).*","\\1",Subclass$Name) %>%  ### keep only string within "( )"
+    str_remove_all("[ep]") %>%           
+    strsplit("_") ### split by "_"
+  SCNumber <- Subclass_SC %>% map(length) %>% unlist ### find the number of side chains in each lipid for each individual (want to remove those with no side chains identified)
+  RemoveSpecies <- which(SCNumber < max(SCNumber)) ### vector of indices of those without side chains identified. They will have length less than the maximum number of side chains
+  Subclass_SC <- do.call(rbind, Subclass_SC) %>% as.data.frame() ### 
+  Subclass <- cbind(Subclass, Subclass_SC) ### Join the new columns to the old data frame
+  length2 <- length(Subclass) ### New number of columns
+  colnames(Subclass) <- c(Names, paste("SC", 1:(length2-length1), sep = ""))  ### Rename new colunms with SC1, SC2 ... etc length2-length1 is the total number of new columns
+  if (length(RemoveSpecies) == 0){
+    return(Subclass)
+  }
+  else{
+    return(Subclass[-RemoveSpecies,]) ### Output new data frame after removing rows with unindentified side chains
+  }
+}
+
+
+# X is the data frame to process
+# Subclass is the name of the subclass variable as a string (default: "SubClass")
+F2 <- function(X, Subclass = "SubClass"){
+  Subclass_names <- unique(X[[Subclass]]) ### All the unique Subclasses
+  Out_list <- setNames(replicate(length(Subclass_names), data.frame()), Subclass_names) ### create a list of empty data frames with names Subclass_names with length of the number of subclasses 
+  # if using vector(mode = "list", length = length(Subclass_names)) ... required renaming objects in Out_list, see next line
+  # names(Out_list) <- Subclass_names ## rename each object within the list with the subclass names
+  for (i in Subclass_names){ ### For each separate subclass
+    Out_list[[i]] <- F1(X, i) ### in each object of that ith subclass, run F1 function on data frame X with subclass i
+  }
+  return(Out_list)
+}
+
+LIST1 <- F2(X = DFnew)
+
+#view(LIST1[[1]])
+
+# add another column to LIST called type that has lipid categories
+
+NLs <- c("TG", "DG")
+ELNLs <- c("TG e", "DG e")
+PLs <- c("CL","PC", "PE", "PG", "PI", "PS","LPC")
+ELPLs <- c("PE p", "PE e", "PC e", "PS e")
+
+Composition <- bind_rows(LIST1, .id = "Class") %>% 
+  dplyr::select(Name, SubClass, Samples, Line, Time, Age, Weight, Conc, SC1, SC2, SC3, SC4) %>% 
+  dplyr::mutate(Type = ifelse(SubClass %in% PLs, "PLs", 
+                              ifelse(SubClass %in% ELPLs, "ELPLs",
+                                     ifelse(SubClass %in% ELNLs, "ELNLs",
+                                            "NLs"))))%>% 
+  dplyr::filter(SubClass != "PS e" & SubClass != "DG e")#First remove subclasses PSe and DGe from DF because these two subclasses have all lipid species that do not have acyl chain identified
+
+
+#___________________________
+
+# Calculate the mean CC present in each lipid category in each of the lipid classes
+
+CategoryCCester <- Composition %>% 
+  dplyr::select(Samples, Name, SubClass, Type, Line, Time, Age, Conc, SC1:SC4) %>% 
+  dplyr::filter(Type != 'ELNLs' & Type != "ELPLs") %>% 
+  tidyr::separate(SC1, into = c("SC1CC", "SC1DB"), remove = TRUE) %>% 
+  tidyr::separate(SC2, into = c("SC2CC", "SC2DB"), remove = TRUE) %>% 
+  tidyr::separate(SC3, into = c("SC3CC", "SC3DB"), remove = TRUE) %>% 
+  tidyr::separate(SC4, into = c("SC4CC", "SC4DB"), remove = TRUE) %>% 
+  group_by(Samples, Name, Type) %>% 
+  dplyr::mutate(SC1CC.Wt = as.numeric(SC1CC)*Conc) %>% 
+  dplyr::mutate(SC2CC.Wt = as.numeric(SC2CC)*Conc) %>%
+  dplyr::mutate(SC3CC.Wt = as.numeric(SC3CC)*Conc) %>% 
+  dplyr::mutate(SC4CC.Wt = as.numeric(SC4CC)*Conc) %>%
+  ungroup() %>%
+  dplyr::select(Samples, Name, SubClass, Type, Line, Time, Age, SC1CC.Wt:SC4CC.Wt, Conc) %>% 
+  tidyr::pivot_longer(cols=c('SC1CC.Wt', 'SC2CC.Wt', 'SC3CC.Wt', 'SC4CC.Wt'), names_to='Chain', values_to='ChainCC') %>% 
+  dplyr::filter(ChainCC != "NA") %>% # to remove SC3 from DG
+  group_by(Samples, Type) %>% 
+  dplyr::mutate(Numerator = sum(ChainCC)) %>% 
+  dplyr::mutate(Denominator = sum(Conc)) %>% 
+  dplyr::mutate(Mean.Carbon = Numerator/Denominator) %>% 
+  dplyr::ungroup() %>%
+  dplyr::select(Samples, Line, Time, Age, Type, Mean.Carbon) %>% 
+  unique() %>%
+  summarySE(groupvars = c("Line", "Time", "Age", "Type"), measurevar = "Mean.Carbon", na.rm = TRUE) %>% 
+  dplyr::select(Line, Time, Age, Type, Mean.Carbon, se) %>% 
+  mutate(CC = format(round(.$Mean.Carbon, 2), nsmall = 2)) %>% 
+  mutate(se = format(round(.$se, 2), nsmall = 2)) %>% 
+  tidyr::unite("Mean.Carbon", CC:se, sep = "±") %>% 
+  tidyr::unite("Strain", Line:Time, sep = "") %>%
+  pivot_wider(names_from = c(Strain, Age), values_from = Mean.Carbon) %>% 
+  dplyr::select(Type, "ctNew_1 Day","ctNew_19 Day", "ctOld_1 Day", "ctOld_19 Day", "cbrNew_1 Day", "cbrNew_19 Day", 
+                "cbrOld_1 Day", "cbrOld_19 Day", "sydNew_1 Day", "sydNew_19 Day", "sydOld_1 Day", "sydOld_19 Day", 
+                "s06Older_1 Day", "s06Older_19 Day") #%>%
+#write.csv("ScriptManuscript2/MainTables/Mean Carbons in ester lipid category in the seven strains.csv")
+
+
+CategoryDBester <- Composition %>% 
+  dplyr::select(Samples, Name, SubClass, Type, Line, Time, Age, Conc, SC1:SC4) %>% 
+  dplyr::filter(Type != 'ELNLs' & Type != "ELPLs") %>% 
+  tidyr::separate(SC1, into = c("SC1CC", "SC1DB"), remove = TRUE) %>% 
+  tidyr::separate(SC2, into = c("SC2CC", "SC2DB"), remove = TRUE) %>% 
+  tidyr::separate(SC3, into = c("SC3CC", "SC3DB"), remove = TRUE) %>% 
+  tidyr::separate(SC4, into = c("SC4CC", "SC4DB"), remove = TRUE) %>% 
+  group_by(Samples, Name, Type) %>% 
+  dplyr::mutate(SC1DB.Wt = as.numeric(SC1DB)*Conc) %>% 
+  dplyr::mutate(SC2DB.Wt = as.numeric(SC2DB)*Conc) %>%
+  dplyr::mutate(SC3DB.Wt = as.numeric(SC3DB)*Conc) %>% 
+  dplyr::mutate(SC4DB.Wt = as.numeric(SC4DB)*Conc) %>%
+  ungroup() %>%
+  dplyr::select(Samples, Name, SubClass, Type, Line, Time, Age, SC1DB.Wt:SC4DB.Wt, Conc) %>% 
+  tidyr::pivot_longer(cols=c('SC1DB.Wt', 'SC2DB.Wt', 'SC3DB.Wt', 'SC4DB.Wt'), names_to='Chain', values_to='ChainDB') %>% 
+  dplyr::filter(ChainDB != "NA") %>% # to remove SC3 from DG
+  group_by(Samples, Type) %>% 
+  dplyr::mutate(Numerator = sum(ChainDB)) %>% 
+  dplyr::mutate(Denominator = sum(Conc)) %>% 
+  dplyr::mutate(Mean.DB = Numerator/Denominator) %>% 
+  dplyr::ungroup() %>%
+  dplyr::select(Samples, Line, Time, Age, Type, Mean.DB) %>% 
+  unique() %>%
+  summarySE(groupvars = c("Line", "Time", "Age", "Type"), measurevar = "Mean.DB") %>% 
+  dplyr::select(Line, Time, Age, Type, Mean.DB, se) %>% 
+  mutate(DB = format(round(.$Mean.DB, 2), nsmall = 2)) %>% 
+  mutate(se = format(round(.$se, 2), nsmall = 2)) %>% 
+  tidyr::unite("Mean.DB", DB:se, sep = "±") %>% 
+  tidyr::unite("Strain", Line:Time, sep = "") %>%
+  pivot_wider(names_from = c(Strain, Age), values_from = Mean.DB) %>% 
+  dplyr::select(Type, "ctNew_1 Day","ctNew_19 Day", "ctOld_1 Day", "ctOld_19 Day", "cbrNew_1 Day", "cbrNew_19 Day", 
+                "cbrOld_1 Day", "cbrOld_19 Day", "sydNew_1 Day", "sydNew_19 Day", "sydOld_1 Day", "sydOld_19 Day", 
+                "s06Older_1 Day", "s06Older_19 Day") #%>%
+#write.csv("ScriptManuscript2/MainTables/Mean DB in ester lipid category in the seven strains.csv")
+
+#____________________
+
+CategoryCCAlkyl <- Composition %>% 
+  dplyr::filter(Type == 'ELNLs' | Type == "ELPLs") %>% 
+  dplyr::select(Samples, Name, SubClass, Type, Line, Time, Age, Conc, SC1) %>% 
+  tidyr::separate(SC1, into = c("AlkylCC", "ALkylDB"), remove = TRUE) %>% 
+  group_by(Samples, Name, Type) %>% 
+  dplyr::mutate(AlkylCC.Wt = as.numeric(AlkylCC)*Conc) %>% 
+  ungroup() %>%
+  dplyr::select(Samples, Name, SubClass, Type, Line, Time, Age, AlkylCC.Wt, Conc) %>% 
+  tidyr::pivot_longer(cols=c('AlkylCC.Wt'), names_to='AlkylChain', values_to='AlkylChainCC') %>% 
+  dplyr::select(-AlkylChain) %>% 
+  group_by(Samples, Type) %>% 
+  dplyr::mutate(Numerator = sum(AlkylChainCC)) %>% 
+  dplyr::mutate(Denominator = sum(Conc)) %>% 
+  dplyr::mutate(Mean.CarbonAlkyl = Numerator/Denominator) %>% 
+  dplyr::ungroup() %>%
+  dplyr::select(Samples, Line, Time, Age, Type, Mean.CarbonAlkyl) %>% 
+  unique() %>%
+  summarySE(groupvars = c("Line", "Time", "Age", "Type"), measurevar = "Mean.CarbonAlkyl", na.rm = TRUE) %>% 
+  dplyr::select(Line, Time, Age, Type, Mean.CarbonAlkyl, se) %>% 
+  mutate(CCAlkyl = format(round(.$Mean.CarbonAlkyl, 2), nsmall = 2)) %>% 
+  mutate(se = format(round(.$se, 2), nsmall = 2)) %>% 
+  tidyr::unite("Mean.CarbonAlkyl", CCAlkyl:se, sep = "±") %>% 
+  tidyr::unite("Strain", Line:Time, sep = "") %>%
+  pivot_wider(names_from = c(Strain, Age), values_from = Mean.CarbonAlkyl) %>% 
+  dplyr::select(Type, "ctNew_1 Day","ctNew_19 Day", "ctOld_1 Day", "ctOld_19 Day", "cbrNew_1 Day", "cbrNew_19 Day", 
+                "cbrOld_1 Day", "cbrOld_19 Day", "sydNew_1 Day", "sydNew_19 Day", "sydOld_1 Day", "sydOld_19 Day", 
+                "s06Older_1 Day", "s06Older_19 Day")# %>%
+#write.csv("ScriptManuscript2/MainTables/Mean Carbons in alkyl chains of lipid category in the seven strains.csv")
+
+CategoryCCAcyl <- Composition %>% 
+  dplyr::filter(Type == 'ELNLs' | Type == "ELPLs") %>% 
+  dplyr::select(Samples, Name, SubClass, Type, Line, Time, Age, Conc, SC2:SC3) %>% 
+  tidyr::separate(SC2, into = c("Acyl1CC", "Acyl1DB"), remove = TRUE) %>% 
+  tidyr::separate(SC3, into = c("Acyl2CC", "Acyl2DB"), remove = TRUE) %>% 
+  group_by(Samples, Name, Type) %>% 
+  dplyr::mutate(Acyl1CC.Wt = as.numeric(Acyl1CC)*Conc) %>% 
+  dplyr::mutate(Acyl2CC.Wt = as.numeric(Acyl2CC)*Conc) %>% 
+  ungroup() %>%
+  dplyr::select(Samples, Name, SubClass, Type, Line, Time, Age, Acyl1CC.Wt, Acyl2CC.Wt, Conc) %>% 
+  tidyr::pivot_longer(cols=c('Acyl1CC.Wt', 'Acyl2CC.Wt'), names_to='AcylChain', values_to='AcylChainCC') %>% 
+  dplyr::filter(AcylChainCC != "NA") %>% # to remove SC3 from DG
+  dplyr::select(-AcylChain) %>% 
+  group_by(Samples, Type) %>% 
+  dplyr::mutate(Numerator = sum(AcylChainCC)) %>% 
+  dplyr::mutate(Denominator = sum(Conc)) %>% 
+  dplyr::mutate(Mean.CarbonAcyl = Numerator/Denominator) %>% 
+  dplyr::ungroup() %>%
+  dplyr::select(Samples, Line, Time, Age, Type, Mean.CarbonAcyl) %>% 
+  unique() %>%
+  summarySE(groupvars = c("Line", "Time", "Age", "Type"), measurevar = "Mean.CarbonAcyl", na.rm = TRUE) %>% 
+  dplyr::select(Line, Time, Age, Type, Mean.CarbonAcyl, se) %>% 
+  mutate(CCAcyl = format(round(.$Mean.CarbonAcyl, 2), nsmall = 2)) %>% 
+  mutate(se = format(round(.$se, 2), nsmall = 2)) %>% 
+  tidyr::unite("Mean.CarbonAcyl", CCAcyl:se, sep = "±") %>% 
+  tidyr::unite("Strain", Line:Time, sep = "") %>%
+  pivot_wider(names_from = c(Strain, Age), values_from = Mean.CarbonAcyl) %>% 
+  dplyr::select(Type, "ctNew_1 Day","ctNew_19 Day", "ctOld_1 Day", "ctOld_19 Day", "cbrNew_1 Day", "cbrNew_19 Day", 
+                "cbrOld_1 Day", "cbrOld_19 Day", "sydNew_1 Day", "sydNew_19 Day", "sydOld_1 Day", "sydOld_19 Day", 
+                "s06Older_1 Day", "s06Older_19 Day") #%>%
+#write.csv("ScriptManuscript2/MainTables/Mean Carbons in acyl chains of lipid category in the seven strains.csv")
+
+
+#___________________________
+
+CategoryDBAlkyl <- Composition %>% 
+  dplyr::filter(Type == 'ELNLs' | Type == "ELPLs") %>% 
+  dplyr::select(Samples, Name, SubClass, Type, Line, Time, Age, Conc, SC1) %>% 
+  tidyr::separate(SC1, into = c("AlkylCC", "AlkylDB"), remove = TRUE) %>% 
+  group_by(Samples, Name, Type) %>% 
+  dplyr::mutate(AlkylDB.Wt = as.numeric(AlkylDB)*Conc) %>% 
+  ungroup() %>%
+  dplyr::select(Samples, Name, SubClass, Type, Line, Time, Age, AlkylDB.Wt, Conc) %>% 
+  tidyr::pivot_longer(cols=c('AlkylDB.Wt'), names_to='AlkylChain', values_to='AlkylChainDB') %>% 
+  dplyr::select(-AlkylChain) %>% 
+  group_by(Samples, Type) %>% 
+  dplyr::mutate(Numerator = sum(AlkylChainDB)) %>% 
+  dplyr::mutate(Denominator = sum(Conc)) %>% 
+  dplyr::mutate(Mean.DBAlkyl = Numerator/Denominator) %>% 
+  dplyr::ungroup() %>%
+  dplyr::select(Samples, Line, Time, Age, Type, Mean.DBAlkyl) %>% 
+  unique() %>%
+  summarySE(groupvars = c("Line", "Time", "Age", "Type"), measurevar = "Mean.DBAlkyl", na.rm = TRUE) %>% 
+  dplyr::select(Line, Time, Age, Type, Mean.DBAlkyl, se) %>% 
+  mutate(DBAlkyl = format(round(.$Mean.DBAlkyl, 2), nsmall = 2)) %>% 
+  mutate(se = format(round(.$se, 2), nsmall = 2)) %>% 
+  tidyr::unite("Mean.DBAlkyl", DBAlkyl:se, sep = "±") %>% 
+  tidyr::unite("Strain", Line:Time, sep = "") %>%
+  pivot_wider(names_from = c(Strain, Age), values_from = Mean.DBAlkyl) %>% 
+  dplyr::select(Type, "ctNew_1 Day","ctNew_19 Day", "ctOld_1 Day", "ctOld_19 Day", "cbrNew_1 Day", "cbrNew_19 Day", 
+                "cbrOld_1 Day", "cbrOld_19 Day", "sydNew_1 Day", "sydNew_19 Day", "sydOld_1 Day", "sydOld_19 Day", 
+                "s06Older_1 Day", "s06Older_19 Day") #%>%
+#write.csv("ScriptManuscript2/MainTables/Mean DB in alkyl chains of lipid category in the seven strains.csv")
+
+CategoryDBAcyl <- Composition %>% 
+  dplyr::filter(Type == 'ELNLs' | Type == "ELPLs") %>% 
+  dplyr::select(Samples, Name, SubClass, Type, Line, Time, Age, Conc, SC2:SC3) %>% 
+  tidyr::separate(SC2, into = c("Acyl1CC", "Acyl1DB"), remove = TRUE) %>% 
+  tidyr::separate(SC3, into = c("Acyl2CC", "Acyl2DB"), remove = TRUE) %>% 
+  group_by(Samples, Name, Type) %>% 
+  dplyr::mutate(Acyl1DB.Wt = as.numeric(Acyl1DB)*Conc) %>% 
+  dplyr::mutate(Acyl2DB.Wt = as.numeric(Acyl2DB)*Conc) %>% 
+  ungroup() %>%
+  dplyr::select(Samples, Name, SubClass, Type, Line, Time, Age, Acyl1DB.Wt, Acyl2DB.Wt, Conc) %>% 
+  tidyr::pivot_longer(cols=c('Acyl1DB.Wt', 'Acyl2DB.Wt'), names_to='AcylChain', values_to='AcylChainDB') %>% 
+  dplyr::filter(AcylChainDB != "NA") %>% # to remove SC3 from DG
+  dplyr::select(-AcylChain) %>% 
+  group_by(Samples, Type) %>% 
+  dplyr::mutate(Numerator = sum(AcylChainDB)) %>% 
+  dplyr::mutate(Denominator = sum(Conc)) %>% 
+  dplyr::mutate(Mean.DBAcyl = Numerator/Denominator) %>% 
+  dplyr::ungroup() %>%
+  dplyr::select(Samples, Line, Time, Age, Type, Mean.DBAcyl) %>% 
+  unique() %>%
+  summarySE(groupvars = c("Line", "Time", "Age", "Type"), measurevar = "Mean.DBAcyl", na.rm = TRUE) %>% 
+  dplyr::select(Line, Time, Age, Type, Mean.DBAcyl, se) %>% 
+  mutate(DBAcyl = format(round(.$Mean.DBAcyl, 2), nsmall = 2)) %>% 
+  mutate(se = format(round(.$se, 2), nsmall = 2)) %>% 
+  tidyr::unite("Mean.DBAcyl", DBAcyl:se, sep = "±") %>% 
+  tidyr::unite("Strain", Line:Time, sep = "") %>%
+  pivot_wider(names_from = c(Strain, Age), values_from = Mean.DBAcyl) %>% 
+  dplyr::select(Type, "ctNew_1 Day","ctNew_19 Day", "ctOld_1 Day", "ctOld_19 Day", "cbrNew_1 Day", "cbrNew_19 Day", 
+                "cbrOld_1 Day", "cbrOld_19 Day", "sydNew_1 Day", "sydNew_19 Day", "sydOld_1 Day", "sydOld_19 Day", 
+                "s06Older_1 Day", "s06Older_19 Day") #%>%
+#write.csv("ScriptManuscript2/MainTables/Mean DB in acyl chains of lipid category in the seven strains.csv")
+
+#___________________________________________________________________________________
+
+# Calculate the mean CC present in each lipid class
+
+ClassCCester <- Composition %>% 
+  dplyr::select(Samples, Name, SubClass, Type, Line, Time, Age, Weight, Conc, SC1:SC4) %>% 
+  dplyr::filter(Type != 'ELNLs' & Type != "ELPLs") %>% 
+  tidyr::separate(SC1, into = c("SC1CC", "SC1DB"), remove = TRUE) %>% 
+  tidyr::separate(SC2, into = c("SC2CC", "SC2DB"), remove = TRUE) %>% 
+  tidyr::separate(SC3, into = c("SC3CC", "SC3DB"), remove = TRUE) %>% 
+  tidyr::separate(SC4, into = c("SC4CC", "SC4DB"), remove = TRUE) %>% 
+  group_by(Samples, Name, SubClass) %>% 
+  dplyr::mutate(SC1CC.Wt = as.numeric(SC1CC)*Conc) %>% 
+  dplyr::mutate(SC2CC.Wt = as.numeric(SC2CC)*Conc) %>%
+  dplyr::mutate(SC3CC.Wt = as.numeric(SC3CC)*Conc) %>% 
+  dplyr::mutate(SC4CC.Wt = as.numeric(SC4CC)*Conc) %>%
+  ungroup() %>%
+  dplyr::select(Samples, Name, SubClass, Line, Time, Age, Weight, SC1CC.Wt:SC4CC.Wt, Conc) %>% 
+  tidyr::pivot_longer(cols=c('SC1CC.Wt', 'SC2CC.Wt', 'SC3CC.Wt', 'SC4CC.Wt'), names_to='Chain', values_to='ChainCC') %>% 
+  dplyr::filter(ChainCC != "NA") %>% # to remove SC3 from DG
+  group_by(Samples, SubClass) %>% 
+  dplyr::mutate(Numerator = sum(ChainCC)) %>% 
+  dplyr::mutate(Denominator = sum(Conc)) %>% 
+  dplyr::mutate(Mean.Carbon = Numerator/Denominator) %>% 
+  dplyr::ungroup() %>%
+  dplyr::select(Samples, Line, Time, Age, SubClass, Mean.Carbon) %>% 
+  unique() %>%
+  summarySE(groupvars = c("Line", "Time", "Age", "SubClass"), measurevar = "Mean.Carbon") %>% 
+  dplyr::select(Line, Time, Age, SubClass, Mean.Carbon, se) %>% 
+  mutate(Mean.Carbon = format(round(.$Mean.Carbon, 2), nsmall = 2)) %>% 
+  mutate(se = format(round(.$se, 2), nsmall = 2)) %>% 
+  tidyr::unite("Mean.CC",Mean.Carbon:se, sep = "±") %>% 
+  tidyr::unite("Strain", Line:Time, sep = "") %>%
+  pivot_wider(names_from = c(Strain, Age), values_from = Mean.CC) %>% 
+  dplyr::select(SubClass, "ctNew_1 Day","ctNew_19 Day", "ctOld_1 Day", "ctOld_19 Day", "cbrNew_1 Day", "cbrNew_19 Day", 
+                "cbrOld_1 Day", "cbrOld_19 Day", "sydNew_1 Day", "sydNew_19 Day", "sydOld_1 Day", "sydOld_19 Day", 
+                "s06Older_1 Day", "s06Older_19 Day") #%>%
+#write.csv("ScriptManuscript2/MainTables/CC ester lipid class in the seven strains.csv")
+
+# 3.Variable: Mean double bond content in the ester lipid classes
+
+ClassDBester <- Composition %>% 
+  dplyr::select(Samples, Name, SubClass, Type, Line, Time, Age, Weight, Conc, SC1:SC4) %>% 
+  dplyr::filter(Type != 'ELNLs' & Type != "ELPLs") %>% 
+  tidyr::separate(SC1, into = c("SC1CC", "SC1DB"), remove = TRUE) %>% 
+  tidyr::separate(SC2, into = c("SC2CC", "SC2DB"), remove = TRUE) %>% 
+  tidyr::separate(SC3, into = c("SC3CC", "SC3DB"), remove = TRUE) %>% 
+  tidyr::separate(SC4, into = c("SC4CC", "SC4DB"), remove = TRUE) %>% 
+  group_by(Samples, Name, SubClass) %>% 
+  dplyr::mutate(SC1DB.Wt = as.numeric(SC1DB)*Conc) %>% 
+  dplyr::mutate(SC2DB.Wt = as.numeric(SC2DB)*Conc) %>%
+  dplyr::mutate(SC3DB.Wt = as.numeric(SC3DB)*Conc) %>% 
+  dplyr::mutate(SC4DB.Wt = as.numeric(SC4DB)*Conc) %>%
+  ungroup() %>%
+  dplyr::select(Samples, Name, SubClass, Line, Time, Age, Weight, SC1DB.Wt:SC4DB.Wt, Conc) %>% 
+  tidyr::pivot_longer(cols=c('SC1DB.Wt', 'SC2DB.Wt', 'SC3DB.Wt', 'SC4DB.Wt'), names_to='Chain', values_to='ChainDB') %>% 
+  dplyr::filter(ChainDB != "NA") %>% # to remove SC3 from DG
+  group_by(Samples, SubClass) %>% 
+  dplyr::mutate(Numerator = sum(ChainDB)) %>% 
+  dplyr::mutate(Denominator = sum(Conc)) %>% 
+  dplyr::mutate(Mean.Bond = Numerator/Denominator) %>% 
+  dplyr::ungroup() %>%
+  dplyr::select(Samples, Line, Time, Age, SubClass, Weight, Mean.Bond) %>% 
+  unique() %>%
+  summarySE(groupvars = c("Line", "Time", "Age", "SubClass"), measurevar = "Mean.Bond") %>% 
+  dplyr::select(Line, Time, Age, SubClass, Mean.Bond, se) %>% 
+  mutate(Mean.Bond = format(round(.$Mean.Bond, 2), nsmall = 2)) %>% 
+  mutate(se = format(round(.$se, 2), nsmall = 2)) %>% 
+  tidyr::unite("Mean.DB", Mean.Bond:se, sep = "±") %>% 
+  tidyr::unite("Strain", Line:Time, sep = "") %>%
+  pivot_wider(names_from = c(Strain, Age), values_from = Mean.DB) %>% 
+  dplyr::select(SubClass, "ctNew_1 Day","ctNew_19 Day", "ctOld_1 Day", "ctOld_19 Day", "cbrNew_1 Day", "cbrNew_19 Day", 
+                "cbrOld_1 Day", "cbrOld_19 Day", "sydNew_1 Day", "sydNew_19 Day", "sydOld_1 Day", "sydOld_19 Day", 
+                "s06Older_1 Day", "s06Older_19 Day") #%>%
+#write.csv("ScriptManuscript2/MainTables/DB ester lipid class in the seven strains.csv")
+
+
+# 4.Variable: Mean carbon content in acyl and alkyl chains of ether lipid classes 
+
+ClassCCAlkyl <- Composition %>% 
+  dplyr::filter(Type == 'ELNLs' | Type == "ELPLs") %>% 
+  dplyr::select(Samples, Name, SubClass, Line, Time, Age, Conc, SC1) %>% 
+  tidyr::separate(SC1, into = c("AlkylCC", "AlkylDB"), remove = TRUE) %>% 
+  group_by(Samples, Name, SubClass) %>% 
+  dplyr::mutate(AlkylCC.Wt = as.numeric(AlkylCC)*Conc) %>% 
+  ungroup() %>%
+  dplyr::select(Samples, Name, SubClass, Line, Time, Age, AlkylCC.Wt, Conc) %>% 
+  tidyr::pivot_longer(cols=c('AlkylCC.Wt'), names_to='AlkylChain', values_to='AlkylChainCC') %>% 
+  dplyr::select(-AlkylChain) %>% 
+  group_by(Samples, SubClass) %>% 
+  dplyr::mutate(Numerator = sum(AlkylChainCC)) %>% 
+  dplyr::mutate(Denominator = sum(Conc)) %>% 
+  dplyr::mutate(Mean.CarbonAlkyl = Numerator/Denominator) %>% 
+  dplyr::ungroup() %>%
+  dplyr::select(Samples, Line, Time, Age, SubClass, Mean.CarbonAlkyl) %>% 
+  unique() %>%
+  summarySE(groupvars = c("Line", "Time", "Age", "SubClass"), measurevar = "Mean.CarbonAlkyl", na.rm = TRUE) %>% 
+  dplyr::select(Line, Time, Age, SubClass, Mean.CarbonAlkyl, se) %>% 
+  mutate(Mean.CarbonAlkyl = format(round(.$Mean.CarbonAlkyl, 2), nsmall = 2)) %>% 
+  mutate(se = format(round(.$se, 2), nsmall = 2)) %>% 
+  tidyr::unite("Mean.CCAlkyl", Mean.CarbonAlkyl:se, sep = "±") %>% 
+  tidyr::unite("Strain", Line:Time, sep = "") %>%
+  pivot_wider(names_from = c(Strain, Age), values_from = Mean.CCAlkyl) %>% 
+  dplyr::select(SubClass, "ctNew_1 Day","ctNew_19 Day", "ctOld_1 Day", "ctOld_19 Day", "cbrNew_1 Day", "cbrNew_19 Day", 
+                "cbrOld_1 Day", "cbrOld_19 Day", "sydNew_1 Day", "sydNew_19 Day", "sydOld_1 Day", "sydOld_19 Day", 
+                "s06Older_1 Day", "s06Older_19 Day") %>%
+  dplyr::mutate(Chain = "Alkyl",.before=SubClass)
+
+ClassCCAcyl <- Composition %>% 
+  dplyr::filter(Type == 'ELNLs' | Type == "ELPLs") %>% 
+  dplyr::select(Samples, Name, SubClass, Line, Time, Age, Conc, SC2:SC3) %>% 
+  tidyr::separate(SC2, into = c("Acyl1CC", "Acyl1DB"), remove = TRUE) %>% 
+  tidyr::separate(SC3, into = c("Acyl2CC", "Acyl2DB"), remove = TRUE) %>% 
+  group_by(Samples, Name, SubClass) %>% 
+  dplyr::mutate(Acyl1CC.Wt = as.numeric(Acyl1CC)*Conc) %>% 
+  dplyr::mutate(Acyl2CC.Wt = as.numeric(Acyl2CC)*Conc) %>% 
+  ungroup() %>%
+  dplyr::select(Samples, Name, SubClass, Line, Time, Age, Acyl1CC.Wt, Acyl2CC.Wt, Conc) %>% 
+  tidyr::pivot_longer(cols=c('Acyl1CC.Wt', 'Acyl2CC.Wt'), names_to='AcylChain', values_to='AcylChainCC') %>% 
+  dplyr::filter(AcylChainCC != "NA") %>% # to remove SC3 from DG
+  dplyr::select(-AcylChain) %>% 
+  group_by(Samples, SubClass) %>% 
+  dplyr::mutate(Numerator = sum(AcylChainCC)) %>% 
+  dplyr::mutate(Denominator = sum(Conc)) %>% 
+  dplyr::mutate(Mean.CarbonAcyl = Numerator/Denominator) %>% 
+  dplyr::ungroup() %>%
+  dplyr::select(Samples, Line, Time, Age, SubClass, Mean.CarbonAcyl) %>% 
+  unique() %>%
+  summarySE(groupvars = c("Line", "Time", "Age", "SubClass"), measurevar = "Mean.CarbonAcyl", na.rm = TRUE) %>% 
+  dplyr::select(Line, Time, Age, SubClass, Mean.CarbonAcyl, se) %>% 
+  mutate(Mean.CarbonAcyl = format(round(.$Mean.CarbonAcyl, 2), nsmall = 2)) %>% 
+  mutate(se = format(round(.$se, 2), nsmall = 2)) %>% 
+  tidyr::unite("CCAcyl", Mean.CarbonAcyl:se, sep = "±") %>% 
+  tidyr::unite("Strain", Line:Time, sep = "") %>%
+  pivot_wider(names_from = c(Strain, Age), values_from = CCAcyl) %>% 
+  dplyr::select(SubClass, "ctNew_1 Day","ctNew_19 Day", "ctOld_1 Day", "ctOld_19 Day", "cbrNew_1 Day", "cbrNew_19 Day", 
+                "cbrOld_1 Day", "cbrOld_19 Day", "sydNew_1 Day", "sydNew_19 Day", "sydOld_1 Day", "sydOld_19 Day", 
+                "s06Older_1 Day", "s06Older_19 Day") %>%
+  dplyr::mutate(Chain = "Acyl",.before=SubClass)
+
+ClassEtherCC <- rbind(ClassCCAlkyl, ClassCCAcyl) #%>% 
+# write.csv("ScriptManuscript2/MainTables/CC ether lipid class in the seven strains.csv")
+
+
+# 4.Variable: Mean double bond content in acyl and alkyl chains of ether lipids 
+
+ClassDBAlkyl <- Composition %>% 
+  dplyr::filter(Type == 'ELNLs' | Type == "ELPLs") %>% 
+  dplyr::select(Samples, Name, SubClass, Line, Time, Age, Conc, SC1) %>% 
+  tidyr::separate(SC1, into = c("AlkylCC", "AlkylDB"), remove = TRUE) %>% 
+  group_by(Samples, Name, SubClass) %>% 
+  dplyr::mutate(AlkylDB.Wt = as.numeric(AlkylDB)*Conc) %>% 
+  ungroup() %>%
+  dplyr::select(Samples, Name, SubClass, Line, Time, Age, AlkylDB.Wt, Conc) %>% 
+  tidyr::pivot_longer(cols=c('AlkylDB.Wt'), names_to='AlkylChain', values_to='AlkylChainDB') %>% 
+  dplyr::select(-AlkylChain) %>% 
+  group_by(Samples, SubClass) %>% 
+  dplyr::mutate(Numerator = sum(AlkylChainDB)) %>% 
+  dplyr::mutate(Denominator = sum(Conc)) %>% 
+  dplyr::mutate(Mean.DBAlkyl = Numerator/Denominator) %>% 
+  dplyr::ungroup() %>%
+  dplyr::select(Samples, Line, Time, Age, SubClass, Mean.DBAlkyl) %>% 
+  unique() %>%
+  summarySE(groupvars = c("Line", "Time", "Age", "SubClass"), measurevar = "Mean.DBAlkyl", na.rm = TRUE) %>% 
+  dplyr::select(Line, Time, Age, SubClass, Mean.DBAlkyl, se) %>% 
+  mutate(Mean.DBAlkyl = format(round(.$Mean.DBAlkyl, 2), nsmall = 2)) %>% 
+  mutate(se = format(round(.$se, 2), nsmall = 2)) %>% 
+  tidyr::unite("DBAlkyl", Mean.DBAlkyl:se, sep = "±") %>% 
+  tidyr::unite("Strain", Line:Time, sep = "") %>%
+  pivot_wider(names_from = c(Strain, Age), values_from = DBAlkyl) %>% 
+  dplyr::select(SubClass, "ctNew_1 Day","ctNew_19 Day", "ctOld_1 Day", "ctOld_19 Day", "cbrNew_1 Day", "cbrNew_19 Day", 
+                "cbrOld_1 Day", "cbrOld_19 Day", "sydNew_1 Day", "sydNew_19 Day", "sydOld_1 Day", "sydOld_19 Day", 
+                "s06Older_1 Day", "s06Older_19 Day") %>%
+  dplyr::mutate(Chain = "Alkyl",.before=SubClass)
+
+ClassDBAcyl <- Composition %>% 
+  dplyr::filter(Type == 'ELNLs' | Type == "ELPLs") %>% 
+  dplyr::select(Samples, Name, SubClass, Line, Time, Age, Conc, SC2:SC3) %>% 
+  tidyr::separate(SC2, into = c("Acyl1CC", "Acyl1DB"), remove = TRUE) %>% 
+  tidyr::separate(SC3, into = c("Acyl2CC", "Acyl2DB"), remove = TRUE) %>% 
+  group_by(Samples, Name, SubClass) %>% 
+  dplyr::mutate(Acyl1DB.Wt = as.numeric(Acyl1DB)*Conc) %>% 
+  dplyr::mutate(Acyl2DB.Wt = as.numeric(Acyl2DB)*Conc) %>% 
+  ungroup() %>%
+  dplyr::select(Samples, Name, SubClass, Line, Time, Age, Acyl1DB.Wt, Acyl2DB.Wt, Conc) %>% 
+  tidyr::pivot_longer(cols=c('Acyl1DB.Wt', 'Acyl2DB.Wt'), names_to='AcylChain', values_to='AcylChainDB') %>% 
+  dplyr::filter(AcylChainDB != "NA") %>% # to remove SC3 from DG
+  dplyr::select(-AcylChain) %>% 
+  group_by(Samples, SubClass) %>% 
+  dplyr::mutate(Numerator = sum(AcylChainDB)) %>% 
+  dplyr::mutate(Denominator = sum(Conc)) %>% 
+  dplyr::mutate(Mean.DBAcyl = Numerator/Denominator) %>% 
+  dplyr::ungroup() %>%
+  dplyr::select(Samples, Line, Time, Age, SubClass, Mean.DBAcyl) %>% 
+  unique() %>%
+  summarySE(groupvars = c("Line", "Time", "Age", "SubClass"), measurevar = "Mean.DBAcyl", na.rm = TRUE) %>% 
+  dplyr::select(Line, Time, Age, SubClass, Mean.DBAcyl, se) %>% 
+  mutate(Mean.DBAcyl = format(round(.$Mean.DBAcyl, 2), nsmall = 2)) %>% 
+  mutate(se = format(round(.$se, 2), nsmall = 2)) %>% 
+  tidyr::unite("DBAcyl", Mean.DBAcyl:se, sep = "±") %>% 
+  tidyr::unite("Strain", Line:Time, sep = "") %>%
+  pivot_wider(names_from = c(Strain, Age), values_from = DBAcyl) %>% 
+  dplyr::select(SubClass, "ctNew_1 Day","ctNew_19 Day", "ctOld_1 Day", "ctOld_19 Day", "cbrNew_1 Day", "cbrNew_19 Day", 
+                "cbrOld_1 Day", "cbrOld_19 Day", "sydNew_1 Day", "sydNew_19 Day", "sydOld_1 Day", "sydOld_19 Day", 
+                "s06Older_1 Day", "s06Older_19 Day") %>%
+  dplyr::mutate(Chain = "Acyl",.before=SubClass)
+
+ClassEtherDB <- rbind(ClassDBAlkyl,ClassDBAcyl) #%>% 
+#write.csv("ScriptManuscript2/MainTables/DB ether lipid class in the seven strains.csv")
+
+#________________________________________________________________________________________________________________________
+
+
+#__________________________Make correlation plots for CC DB for ELNLs & NLs______________________________________________
+
+rm(list=ls())
+
+# 1. Make a correlation plot for mean CC in alkyl vs acyl chains in ELNLs.
+
+ELNLChainCC <- read_excel("ScriptManuscript2/MainTables/AlkylAcylENL_CC.xlsx") %>% 
+  dplyr::rename(Alkyl = "ENLs (akyl)") %>% 
+  dplyr::rename(Acyl = "ENLs (acyl)") #%>% 
+#tidyr::pivot_longer(cols=c(Akyl, Acyl), names_to='Chain', values_to='CC') 
+
+
+# make correlation plot 
+
+plotA_legend <- ELNLChainCC %>% 
+  dplyr::mutate(Alkyl = as.numeric(Alkyl)) %>% 
+  dplyr::mutate(Acyl = as.numeric(Acyl)) %>% 
+  dplyr::mutate(Strain = factor(as.factor(Strain), levels = c("CTnew","CTold", "SDnew","SDold","SDolder","CNnew","CNold"))) %>%
+  ggplot(aes(Acyl, Alkyl, colour = Strain))+
+  geom_point()+ 
+  geom_errorbar(aes(xmin=Acyl-acylSE, xmax=Acyl+acylSE,colour = Strain), width = 0.001, size = 0.2, alpha = 1) +
+  geom_errorbar(aes(ymin=Alkyl-akylSE, ymax=Alkyl+akylSE,colour = Strain), width = 0.001, size = 0.2, alpha = 1) +
+  geom_text_repel(aes(label = paste0(Strain)), size = 3, min.segment.length = 0, seed = 42, box.padding = 0.5) +
+  stat_smooth(method = "lm",col = "#C42126", se = FALSE,size = 0.5)+
+  labs(x= "Acyl chain carbons ENL", y = "Alkyl chain carbons")+
+  theme_bw()+
+  theme(axis.title.y = element_text(face = "bold", size = 8), axis.title.x = element_text(face="bold", size = 8))+
+  theme(axis.text.y = element_text(face = "bold", size = 8), axis.text.x = element_text(face="bold", size = 8))+
+  theme(legend.position = "bottom") +  guides(colour=guide_legend(nrow=1))+
+  theme(legend.title=element_text(size= 8), legend.text = element_text(size = (8))) + 
+  theme(axis.title = element_text(size = 10)) +
+  #facet_grid(~ Age)+
+  facet_grid(Age ~ .)+
+  theme(strip.background =element_rect(fill="Black"))+
+  theme(strip.text = element_text(colour = 'white', size = 8))+
+  stat_cor(aes(label = ..rr.label..), color = "black", geom = "label", size = 3)
+
+plotA <- ELNLChainCC %>% 
+  dplyr::mutate(Alkyl = as.numeric(Alkyl)) %>% 
+  dplyr::mutate(Acyl = as.numeric(Acyl)) %>% 
+  dplyr::mutate(Strain = factor(as.factor(Strain), levels = c("CTnew","CTold", "SDnew","SDold","SDolder","CNnew","CNold"))) %>%
+  ggplot(aes(Acyl, Alkyl, colour = Strain))+
+  geom_point()+ 
+  geom_errorbar(aes(xmin=Acyl-acylSE, xmax=Acyl+acylSE,colour = Strain), width = 0.001, size = 0.2, alpha = 1) +
+  geom_errorbar(aes(ymin=Alkyl-akylSE, ymax=Alkyl+akylSE,colour = Strain), width = 0.001, size = 0.2, alpha = 1) +
+  geom_text_repel(aes(label = paste0(Strain)), size = 3, min.segment.length = 0, seed = 42, box.padding = 0.5) +
+  stat_smooth(method = "lm",col = "#C42126", se = FALSE,size = 0.5)+
+  labs(x= "Acyl chain carbons ENL", y = "Alkyl chain carbons")+
+  theme_bw()+
+  theme(axis.title.y = element_text(face = "bold", size = 8), axis.title.x = element_text(face="bold", size = 8))+
+  theme(axis.text.y = element_text(face = "bold", size = 8), axis.text.x = element_text(face="bold", size = 8))+
+  theme(legend.position = "none") +  
+  theme(legend.title=element_text(size= 8), legend.text = element_text(size = (8))) + 
+  theme(axis.title = element_text(size = 10)) +
+  #facet_grid(~ Age)+
+  facet_grid(Age ~ .)+
+  theme(strip.background =element_rect(fill="White"))+
+  theme(strip.text = element_text(colour = 'Black', size = 8))+
+  #stat_cor(aes(label = ..rr.label..), color = "black", geom = "label", size = 3)+
+  stat_cor(aes(), color = "black", geom = "label", size = 2.5)
+
+#ggsave(plot = plotA, width = 6, height = 4, units = "in", dpi = 300,filename = "ScriptManuscript2/Figures/Alkyl_vs_Acyl_Correlation_plot_ENLCC.jpg")                
+
+
+#____________________
+
+# 2. Make a correlation plot for mean CC in alkyl vs acyl chains in EPLs.
+
+EPLChainCC <- read_excel("ScriptManuscript2/MainTables/AlkylAcylEPL_CC.xlsx") %>% 
+  dplyr::rename(Alkyl = "EPLs (akyl)") %>% 
+  dplyr::rename(Acyl = "EPLs (acyl)") 
+
+plotB <- EPLChainCC %>% 
+  dplyr::mutate(Alkyl = as.numeric(Alkyl)) %>% 
+  dplyr::mutate(Acyl = as.numeric(Acyl)) %>% 
+  dplyr::mutate(Strain = factor(as.factor(Strain), levels = c("CTnew","CTold", "SDnew","SDold","SDolder","CNnew","CNold"))) %>%
+  ggplot(aes(Acyl, Alkyl, colour = Strain))+
+  geom_point()+ 
+  geom_errorbar(aes(xmin=Acyl-acylSE, xmax=Acyl+acylSE,colour = Strain), width = 0.001, size = 0.2, alpha = 1) +
+  geom_errorbar(aes(ymin=Alkyl-akylSE, ymax=Alkyl+akylSE,colour = Strain), width = 0.001, size = 0.2, alpha = 1) +
+  geom_text_repel(aes(label = paste0(Strain)), size = 3, min.segment.length = 0, seed = 42, box.padding = 0.5, max.overlaps = Inf) +
+  stat_smooth(method = "lm",col = "#C42126", se = FALSE,size = 0.5)+
+  labs(x= "Acyl chain carbons EPL", y = "Alkyl chain carbons")+
+  theme_bw()+
+  theme(axis.title.y = element_blank(), axis.title.x = element_text(face="bold", size = 8))+
+  #theme(axis.title.y = element_text(face = "bold", size = 8), axis.title.x = element_text(face="bold", size = 8))+
+  theme(axis.text.y = element_text(face = "bold", size = 8), axis.text.x = element_text(face="bold", size = 8))+
+  theme(legend.position = "none") + 
+  theme(legend.title=element_text(size= 8), legend.text = element_text(size = (8))) + 
+  theme(axis.title = element_text(size = 10)) +
+  #facet_grid(~ Age)+
+  facet_grid(Age ~ .)+
   theme(strip.background =element_rect(fill="white"))+
-  theme(strip.text = element_text(colour = 'Black', size = 10))+
-  xlab(paste0("Fly weight")) +
-  ylab(paste0("Total lipids (mg)"))+
-  theme(legend.position="none")+
-  theme(legend.text=element_text(size = 10))+
-  theme(axis.title.y = element_text(face = "bold"), axis.title.x = element_text(face="bold")) + 
-  theme(axis.text.y = element_text(size = 8), axis.text.x = element_text(size = 8)) + 
-  theme(plot.title = element_text(face = "bold", hjust = 0.5, size = (12))) + theme(axis.title = element_text(size = 12))+
-  scale_colour_manual(values = c("New" = "deepskyblue", "Old" = "blue", "Older" = "red"))+
-  scale_shape_manual(values = c("CT" = 2, "CN" = 5, "SD" = 0))+
-  theme(axis.title.x=element_blank(), axis.title.y=element_blank())+
-  stat_cor(aes(), color = "black", label.y.npc="top", label.x.npc = "left", geom = "label", size = 2.5) 
-  
-pd = position_dodge(0.4)
+  theme(strip.text = element_text(colour = 'Black', size = 8))+
+  #stat_cor(aes(label = ..rr.label..), color = "black", geom = "label", size = 3)+
+  stat_cor(aes(), color = "black", geom = "label", size = 2.5)
 
-WT.TL_D19 <- TL.WT %>% 
-  dplyr::filter(Age == "D19") %>% 
-  ggplot(aes(WT, TL))+ 
-  geom_point(mapping = aes(colour = Time, shape = Line), size = 4, position = pd) +
-  theme_bw() +
-  geom_errorbar(aes(xmin = WT-WTSE, xmax = WT+WTSE, colour = Time), width =  0.0001, size  =  0.5, position = pd) +
-  geom_errorbar(aes(ymin=TL-TLSE, ymax=TL+TLSE,colour = Time), width =  0.0001, size  =  0.5, position = pd) +
-  facet_grid(~ Age)+
-  theme(strip.background =element_rect(fill="white"))+
-  theme(strip.text = element_text(colour = 'Black', size = 10))+
-  xlab(paste0("Fly weight (mg)")) +
-  ylab(paste0("Total lipid titre"))+
-  theme(legend.position="none")+
-  theme(legend.text=element_text(size = 10))+
-  theme(axis.title.y = element_text(face = "bold"), axis.title.x = element_text(face="bold")) + 
-  theme(axis.text.y = element_text(size = 8), axis.text.x = element_text(size = 8)) + 
-  theme(plot.title = element_text(face = "bold", hjust = 0.5, size = (12))) + theme(axis.title = element_text(size = 12))+
-  scale_colour_manual(values = c("New" = "deepskyblue", "Old" = "blue", "Older" = "red"))+
-  scale_shape_manual(values = c("CT" = 2, "CN" = 5, "SD" = 0)) +
-  theme(axis.title.x=element_blank(), axis.title.y=element_blank()) +
-  stat_cor(aes(), color = "black", label.y.npc="top", label.x.npc = "left", geom = "label", size = 2.5)
 
-pd = position_dodge(0.0005)
+#ggsave(plot = plotB, width = 6, height = 4, units = "in", dpi = 300,filename = "ScriptManuscript2/Figures/Alkyl_vs_Acyl_Correlation_plot_EPLCC.jpg")                
 
-Legend1 <- TL.WT %>% 
-  dplyr::filter(Age == "D1") %>% 
-  ggplot(aes(WT, TL))+ 
-  geom_point(mapping = aes(colour = Time, shape = Line), size = 4, position = pd) +
-  theme_bw() +
-  geom_errorbar(aes(xmin = WT-WTSE, xmax = WT+WTSE, colour = Time), width =  0.0001, size  =  0.5, position = pd) +
-  geom_errorbar(aes(ymin=TL-TLSE, ymax=TL+TLSE,colour = Time), width =  0.0001, size  =  0.5, position = pd) +
-  facet_grid(~ Age)+
-  theme(strip.background =element_rect(fill="white"))+
-  theme(strip.text = element_text(colour = 'Black', size =8))+
-  xlab(paste0("Fly weight (mg)")) +
-  ylab(paste0("Total lipid titre"))+
-  theme(legend.position="bottom")+
-  theme(legend.text=element_text(size = 8))+
-  theme(axis.title.y = element_text(face = "bold"), axis.title.x = element_text(face="bold")) + 
-  theme(axis.text.y = element_text(size = 12), axis.text.x = element_text(size = 12)) + 
-  theme(plot.title = element_text(face = "bold", hjust = 0.5, size = (12))) + theme(axis.title = element_text(size = 12))+
-  scale_colour_manual(values = c("New" = "deepskyblue", "Old" = "blue", "Older" = "red"))+
-  scale_shape_manual(values = c("CT" = 2, "CN" = 5, "SD" = 0))
 
-#Arrange and save the correlation plots for DB
+#Arrange and save the correlation plots for CC
 
-get_legend <- function(myggplot){
+get_legend<-function(myggplot){
   tmp <- ggplot_gtable(ggplot_build(myggplot))
   leg <- which(sapply(tmp$grobs, function(x) x$name) == "guide-box")
   legend <- tmp$grobs[[leg]]
   return(legend)
 }
 
-legend <- get_legend(Legend1)
+legend <- get_legend(plotA_legend)
 
-Figure1 <- ggarrange(WT.TL_D1, WT.TL_D19, ncol = 2)
+Figure6 <- grid.arrange(plotA, plotB, legend, ncol=2, nrow = 2, layout_matrix = rbind(c(1,2), c(3,3)),
+                        widths = c(2.7, 2.7), heights = c(2.5, 0.2))
 
-Figure1_annotated <- annotate_figure(Figure1, bottom = text_grob("Dry weight", hjust = 0.5, face = "bold", size = 8),
-                                    left = text_grob("Total lipid titre", rot = 90, face = "bold", size = 8))
+# Save Figure 6
 
-Figure1_arranged <- grid.arrange(Figure1_annotated, legend, nrow = 2, layout_matrix = rbind(c(1,1), c(3,3)),
-                                widths = c(2.7, 2.7), heights = c(2.5, 0.3))
+#ggsave(plot = Figure1, width = 9, height = 6, units = "in", dpi = 300,filename = "ScriptManuscript2/Figures/Figure6_Alkyl_vs_Acyl_CC_Correlation_plot_ELs.jpg")              
+
+#_______________________________________________________________________________________________________________
+
+#_______________________Correlation plot for mean DB in alkyl vs acyl chains in ELNLs___________________________
+
+# 3. Make a correlation plot for mean DB in alkyl vs acyl chains in ELNLs.
+
+ELNLChainDB <- read_excel("ScriptManuscript2/MainTables/AlkylAcylENL_DB.xlsx") %>% 
+  dplyr::rename(Alkyl = "ENLs (akyl)") %>% 
+  dplyr::rename(Acyl = "ENLs (acyl)") 
 
 
-ggsave(plot = Figure1_arranged, width = 7.0, height = 3.5, units = "in", dpi = 300,filename = "Figures/Weight_vs_total_lipid_titre_correlation_plot.jpg")              
+# make correlation plot 
 
-
-#_________________________________________________________________________________________
-
-
-#_____________Plot the percent of fly weight due to lipid_________________________
-
-PL.WT <- TL.WT %>% 
-  dplyr::mutate(LineTime = replace(LineTime, LineTime == "CT_New", "CTnew")) %>% 
-  dplyr::mutate(LineTime = replace(LineTime, LineTime == "CT_Old", "CTold")) %>% 
-  dplyr::mutate(LineTime = replace(LineTime, LineTime == "SD_New", "SDnew")) %>% 
-  dplyr::mutate(LineTime = replace(LineTime, LineTime == "SD_Old", "SDold")) %>% 
-  dplyr::mutate(LineTime = replace(LineTime, LineTime == "SD_Older", "SDolder")) %>% 
-  dplyr::mutate(LineTime= replace(LineTime, LineTime == "CN_New", "CNnew")) %>% 
-  dplyr::mutate(LineTime = replace(LineTime, LineTime == "CN_Old", "CNold")) %>% 
-  dplyr::mutate(Strain = LineTime) %>% 
-  dplyr::select(11,2,3,4,7,8)
-
-pd = position_dodge(0.4)
-
-PL.WT_D1 <- PL.WT %>% 
-  dplyr::filter(Age == "D1") %>% 
+plotC <- ELNLChainDB %>% 
+  dplyr::mutate(Alkyl = as.numeric(Alkyl)) %>% 
+  dplyr::mutate(Acyl = as.numeric(Acyl)) %>% 
   dplyr::mutate(Strain = factor(as.factor(Strain), levels = c("CTnew","CTold", "SDnew","SDold","SDolder","CNnew","CNold"))) %>%
-  ggplot(aes(Strain, PL))+ 
-  geom_point(mapping = aes(colour = Time, shape = Line), size = 4, position = pd) +
-  theme_bw() +
-  #geom_errorbar(aes(xmin = WT-WTSE, xmax = WT+WTSE, colour = Time), width =  0.0001, size  =  0.5, position = pd) +
-  geom_errorbar(aes(ymin=PL-PLSE, ymax=PL+PLSE,colour = Time), width =  0.0001, size  =  0.5, position = pd) +
-  facet_grid(~ Age)+
-  theme(strip.background =element_rect(fill="white"))+
-  theme(strip.text = element_text(colour = 'Black', size = 10))+
-  xlab(paste0("Strain")) +
-  ylab(paste0("Fly weight due to lipids (%)"))+
-  theme(legend.position="none")+
-  theme(legend.text=element_text(size = 10))+
-  theme(axis.title.y = element_text(face = "bold"), axis.title.x = element_text(face="bold")) + 
-  theme(axis.text.y = element_text(size = 8), axis.text.x = element_text(size = 8)) + 
-  theme(plot.title = element_text(face = "bold", hjust = 0.5, size = (12))) + theme(axis.title = element_text(size = 12))+
-  scale_colour_manual(values = c("New" = "deepskyblue", "Old" = "blue", "Older" = "red"))+
-  scale_shape_manual(values = c("CT" = 2, "CN" = 5, "SD" = 0)) +
-  theme(axis.title.x=element_blank(), axis.title.y=element_blank()) 
+  ggplot(aes(Acyl, Alkyl, colour = Strain))+
+  geom_point()+ 
+  geom_errorbar(aes(xmin=Acyl-acylSE, xmax=Acyl+acylSE,colour = Strain), width = 0.001, size = 0.2, alpha = 1) +
+  geom_errorbar(aes(ymin=Alkyl-akylSE, ymax=Alkyl+akylSE,colour = Strain), width = 0.001, size = 0.2, alpha = 1) +
+  geom_text_repel(aes(label = paste0(Strain)), size = 3, min.segment.length = 0, seed = 42, box.padding = 0.5) +
+  stat_smooth(method = "lm",col = "#C42126", se = FALSE,size = 0.5)+
+  labs(x= "Acyl chain double bonds ENL", y = "Alkyl chain double bonds")+
+  theme_bw()+
+  theme(axis.title.y = element_text(face = "bold", size = 8), axis.title.x = element_text(face="bold", size = 8))+
+  theme(axis.text.y = element_text(face = "bold", size = 8), axis.text.x = element_text(face="bold", size = 8))+
+  theme(legend.position = "none") + 
+  theme(legend.title=element_text(size= 8), legend.text = element_text(size = (8))) + 
+  theme(axis.title = element_text(size = 10)) +
+  #facet_grid(~ Age)+
+  facet_grid(Age ~ .)+
+  theme(strip.background =element_rect(fill="White"))+
+  theme(strip.text = element_text(colour = 'Black', size = 8))+
+  #stat_cor(aes(label = ..rr.label..), color = "black", geom = "label", size = 3)
+  stat_cor(aes(), color = "black", geom = "label", size = 2.5)
 
-PL.WT_D19 <- PL.WT %>% 
-  dplyr::filter(Age == "D19") %>% 
+
+#ggsave(plot = plotC, width = 6, height = 4, units = "in", dpi = 300,filename = "ScriptManuscript2/Figures/Alkyl_vs_Acyl_Correlation_plot_ENLDB.jpg")                
+
+#____________________
+
+# 4. Make a correlation plot for mean DB in alkyl vs acyl chains in ELPLs.
+
+ELPLChainDB <- read_excel("ScriptManuscript2/MainTables/AlkylAcylEPL_DB.xlsx") %>% 
+  dplyr::rename(Alkyl = "EPLs (akyl)") %>% 
+  dplyr::rename(Acyl = "EPLs (acyl)") 
+
+
+# make correlation plot 
+
+plotD <- ELPLChainDB %>% 
+  dplyr::mutate(Alkyl = as.numeric(Alkyl)) %>% 
+  dplyr::mutate(Acyl = as.numeric(Acyl)) %>% 
   dplyr::mutate(Strain = factor(as.factor(Strain), levels = c("CTnew","CTold", "SDnew","SDold","SDolder","CNnew","CNold"))) %>%
-  ggplot(aes(Strain, PL))+ 
-  geom_point(mapping = aes(colour = Time, shape = Line), size = 4, position = pd) +
-  theme_bw() +
-  #geom_errorbar(aes(xmin = WT-WTSE, xmax = WT+WTSE, colour = Time), width =  0.0001, size  =  0.5, position = pd) +
-  geom_errorbar(aes(ymin=PL-PLSE, ymax=PL+PLSE,colour = Time), width =  0.0001, size  =  0.5, position = pd) +
-  facet_grid(~ Age)+
-  theme(strip.background =element_rect(fill="white"))+
-  theme(strip.text = element_text(colour = 'Black', size = 10))+
-  xlab(paste0("Strain")) +
-  ylab(paste0("Fly weight due to lipids (%)"))+
-  theme(legend.position="none")+
-  theme(legend.text=element_text(size = 10))+
-  theme(axis.title.y = element_text(face = "bold"), axis.title.x = element_text(face="bold")) + 
-  theme(axis.text.y = element_text(size = 8), axis.text.x = element_text(size = 8)) + 
-  theme(plot.title = element_text(face = "bold", hjust = 0.5, size = (12))) + theme(axis.title = element_text(size = 12))+
-  scale_colour_manual(values = c("New" = "deepskyblue", "Old" = "blue", "Older" = "red"))+
-  scale_shape_manual(values = c("CT" = 2, "CN" = 5, "SD" = 0)) +
-  theme(axis.title.x=element_blank(), axis.title.y=element_blank()) 
+  ggplot(aes(Acyl, Alkyl, colour = Strain))+
+  geom_point()+ 
+  geom_errorbar(aes(xmin=Acyl-acylSE, xmax=Acyl+acylSE,colour = Strain), width = 0.001, size = 0.2, alpha = 1) +
+  geom_errorbar(aes(ymin=Alkyl-akylSE, ymax=Alkyl+akylSE,colour = Strain), width = 0.001, size = 0.2, alpha = 1) +
+  geom_text_repel(aes(label = paste0(Strain)), size = 3, min.segment.length = 0, seed = 42, box.padding = 0.5, max.overlaps = Inf) +
+  #stat_smooth(method = "lm",col = "#C42126", se = FALSE,size = 0.5)+
+  labs(x= "Acyl chain double bonds EPL", y = "Alkyl chain double bonds")+
+  theme_bw()+
+  theme(axis.title.y = element_text(face = "bold", size = 8), axis.title.x = element_text(face="bold", size = 8))+
+  theme(axis.text.y = element_text(face = "bold", size = 8), axis.text.x = element_text(face="bold", size = 8))+
+  theme(legend.position = "none") + 
+  theme(legend.title=element_text(size= 8), legend.text = element_text(size = (8))) + 
+  theme(axis.title = element_text(size = 10)) +
+  #facet_grid(~ Age)+
+  facet_grid(Age ~ .)+
+  theme(strip.background =element_rect(fill="White"))+
+  theme(strip.text = element_text(colour = 'Black', size = 8))+
+  #stat_cor(aes(label = ..rr.label..), color = "black", geom = "label", size = 3)
+  stat_cor(aes(), color = "black", geom = "label", size = 2.5)
 
-Figure2 <- ggarrange(PL.WT_D1, PL.WT_D19, ncol = 2)
+#ggsave(plot = plotD, width = 6, height = 4, units = "in", dpi = 300,filename = "ScriptManuscript2/Figures/Alkyl_vs_Acyl_Correlation_plot_EPLDB.jpg")              
 
-Figure2_annotated <- annotate_figure(Figure2, bottom = text_grob("Strain", hjust = 0.5, face = "bold", size = 8),
-                                    left = text_grob("Lipid weight (%)", rot = 90, face = "bold", size = 8))
+FigureS2 <- grid.arrange(plotC, plotD, legend, ncol=2, nrow = 2, layout_matrix = rbind(c(1,2), c(3,3)),
+                         widths = c(2.7, 2.7), heights = c(2.5, 0.2))
 
-Figure2_arranged <- grid.arrange(Figure2_annotated, legend, nrow = 2, layout_matrix = rbind(c(1,1), c(3,3)),
-                                widths = c(2.7, 2.7), heights = c(2.5, 0.3))
+# Save Figure S2
 
-ggsave(plot = Figure2_arranged, width = 7.5, height = 3.5, units = "in", dpi = 300,filename = "Figures/Percent of fly weight due to lipids.jpg")              
-
-
-#_______________________________________________________________________________________________
-
-
-#____________________Plot the percent of lipid weight vs fly weight_______________________________
-
-PLWT_WT <- TL.WT %>% 
-  dplyr::select(-TL, -TLSE)
-
-pd = position_dodge(0.4)
-
-arrows1 <- PLWT_WT  %>%
-  dplyr::filter(Age == "D1") %>% 
-  dplyr::select(Line, Time, WT, PL) %>%
-  pivot_wider(names_from = Time, values_from = c(WT, PL)) %>%
-  dplyr::rename(x_start =  WT_New, x_end = WT_Old, y_start = PL_New, y_end = PL_Old)
-
-Extra1 <- data.frame(Line = "SD", x_start = arrows1$x_end[3], x_end = arrows1$WT_Older[3],
-                     y_start = arrows1$y_end[3], y_end = arrows1$PL_Older[3])
-
-Final_arrows1 <- rbind(arrows1 %>% dplyr::select(-WT_Older,-PL_Older), Extra1)
-
-
-PLWT_WT_D1 <- PLWT_WT %>% 
-  dplyr::filter(Age == "D1") %>% 
-  ggplot(aes(WT, PL))+ 
-  geom_point(mapping = aes(shape = Time,colour = Line), size = 4, position = pd) +
-  theme_bw() +
-  geom_errorbar(aes(xmin = WT-WTSE, xmax = WT+WTSE, colour = Line), width =  0.0001, size  =  0.5, position = pd) +
-  geom_errorbar(aes(ymin=PL-PLSE, ymax=PL+PLSE,colour = Line), width =  0.0001, size  =  0.5, position = pd) +
-  facet_grid(~ Age)+
-  theme(strip.background =element_rect(fill="white"))+
-  theme(strip.text = element_text(colour = 'Black', size = 10))+
-  xlab(paste0("Fly weight (mg)")) +
-  ylab(paste0("Lipid weight (%)"))+
-  ggarchery::geom_arrowsegment(data=Final_arrows1, ### Requires a separate data frame to specify start and end of lines
-                               mapping=aes(x = x_start, xend = x_end, y = y_start, 
-                                           yend = y_end, colour = Line),
-                               arrows = arrow(angle = 30, type = "open", length = unit(0.12, "inches")), # adjust length to adjust size of arrow head 
-                               arrow_positions = 0.5, # location of arrow along the line
-                               size = 0.5) +
-  theme(legend.position="none")+
-  theme(legend.text=element_text(size = 10))+
-  theme(axis.title.y = element_text(face = "bold"), axis.title.x = element_text(face="bold")) + 
-  theme(axis.text.y = element_text(size = 8), axis.text.x = element_text(size = 8)) + 
-  theme(plot.title = element_text(face = "bold", hjust = 0.5, size = (12))) + theme(axis.title = element_text(size = 12))+
-  scale_colour_manual(values = c("CT" = "red", "CN" = "green", "SD" = "blue"))+
-  theme(axis.title.x=element_blank(), axis.title.y=element_blank()) 
- 
-
-arrows2 <- PLWT_WT  %>%
-  dplyr::filter(Age == "D19") %>% 
-  dplyr::select(Line, Time, WT, PL) %>%
-  pivot_wider(names_from = Time, values_from = c(WT, PL)) %>%
-  dplyr::rename(x_start =  WT_New, x_end = WT_Old, y_start = PL_New, y_end = PL_Old)
-
-Extra2 <- data.frame(Line = "SD", x_start = arrows2$x_end[3], x_end = arrows2$WT_Older[3],
-                     y_start = arrows2$y_end[3], y_end = arrows2$PL_Older[3])
-
-Final_arrows2 <- rbind(arrows2 %>% dplyr::select(-WT_Older,-PL_Older), Extra2)
-
-
-PLWT_WT_D19 <- PLWT_WT %>% 
-  dplyr::filter(Age == "D19") %>% 
-  ggplot(aes(WT, PL))+ 
-  geom_point(mapping = aes(shape = Time,colour = Line), size = 4, position = pd) +
-  theme_bw() +
-  geom_errorbar(aes(xmin = WT-WTSE, xmax = WT+WTSE, colour = Line), width =  0.0001, size  =  0.5, position = pd) +
-  geom_errorbar(aes(ymin=PL-PLSE, ymax=PL+PLSE,colour = Line), width =  0.0001, size  =  0.5, position = pd) +
-  facet_grid(~ Age)+
-  theme(strip.background =element_rect(fill="white"))+
-  theme(strip.text = element_text(colour = 'Black', size = 10))+
-  xlab(paste0("Fly weight (mg)")) +
-  ylab(paste0("Lipid weight (%)"))+
-  ggarchery::geom_arrowsegment(data=Final_arrows2, ### Requires a separate data frame to specify start and end of lines
-                               mapping=aes(x = x_start, xend = x_end, y = y_start, 
-                                           yend = y_end, colour = Line),
-                               arrows = arrow(angle = 30, type = "open", length = unit(0.12, "inches")), # adjust length to adjust size of arrow head 
-                               arrow_positions = 0.5, # location of arrow along the line
-                               size = 0.5) +
-  theme(legend.position="none")+
-  theme(legend.text=element_text(size = 10))+
-  theme(axis.title.y = element_text(face = "bold"), axis.title.x = element_text(face="bold")) + 
-  theme(axis.text.y = element_text(size = 8), axis.text.x = element_text(size = 8)) + 
-  theme(plot.title = element_text(face = "bold", hjust = 0.5, size = (12))) + theme(axis.title = element_text(size = 12))+
-  scale_colour_manual(values = c("CT" = "red", "CN" = "green", "SD" = "blue"))+
-  theme(axis.title.x=element_blank(), axis.title.y=element_blank()) 
-
-
-#Arrange and save the correlation plots for DB
-
-Legend2 <- PLWT_WT %>% 
-  dplyr::filter(Age == "D1") %>% 
-  ggplot(aes(WT, PL))+ 
-  geom_point(mapping = aes(shape = Time,colour = Line), size = 4, position = pd) +
-  theme_bw() +
-  geom_errorbar(aes(xmin = WT-WTSE, xmax = WT+WTSE, colour = Line), width =  0.0001, size  =  0.5, position = pd) +
-  geom_errorbar(aes(ymin=PL-PLSE, ymax=PL+PLSE,colour = Line), width =  0.0001, size  =  0.5, position = pd) +
-  facet_grid(~ Age)+
-  theme(strip.background =element_rect(fill="white"))+
-  theme(strip.text = element_text(colour = 'Black', size = 10))+
-  xlab(paste0("Fly weight (mg)")) +
-  ylab(paste0("Lipid weight (%)"))+
-  ggarchery::geom_arrowsegment(data=Final_arrows1, ### Requires a separate data frame to specify start and end of lines
-                               mapping=aes(x = x_start, xend = x_end, y = y_start, 
-                                           yend = y_end, colour = Line),
-                               arrows = arrow(angle = 30, type = "open", length = unit(0.12, "inches")), # adjust length to adjust size of arrow head 
-                               arrow_positions = 0.5, # location of arrow along the line
-                               size = 0.5) +
-  theme(legend.position="bottom")+
-  theme(legend.text=element_text(size = 8))+
-  theme(axis.title.y = element_text(face = "bold"), axis.title.x = element_text(face="bold")) + 
-  theme(axis.text.y = element_text(size = 8), axis.text.x = element_text(size = 8)) + 
-  theme(plot.title = element_text(face = "bold", hjust = 0.5, size = (12))) + theme(axis.title = element_text(size = 12))+
-  scale_colour_manual(values = c("CT" = "red", "CN" = "green", "SD" = "blue"))+
-  theme(axis.title.x=element_blank(), axis.title.y=element_blank()) 
-
-
-legend2 <- get_legend(Legend2)
-
-Figure3 <- ggarrange(PLWT_WT_D1, PLWT_WT_D19, ncol = 2)
-
-Figure3_annotated <- annotate_figure(Figure3, bottom = text_grob("Dry weight (mg)", hjust = 0.5, face = "bold", size = 8),
-                                    left = text_grob("Lipid weight (%)", rot = 90, face = "bold", size = 8))
-
-Figure3_arranged <- grid.arrange(Figure3_annotated, legend2, nrow = 2, layout_matrix = rbind(c(1,1), c(3,3)),
-                                widths = c(2.7, 2.7), heights = c(2.5, 0.3))
-
-
-ggsave(plot = Figure3_arranged, width = 8.0, height = 6.0, units = "in", dpi = 300,filename = "Figures/Percent of fly weight due to lipids vs dry fly weight.jpg")              
+ggsave(plot = FigureS2, width =9, height = 6, units = "in", dpi = 300,filename = "Figures/FigureS2.jpg")              
 
 #________________________________________END_________________________________________
-
