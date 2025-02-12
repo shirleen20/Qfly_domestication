@@ -100,9 +100,9 @@ p2 <- Variables %>%
   theme(axis.title   = element_text(face = "bold"),
         axis.text    = element_text(face = "bold"),
         plot.title = element_text(face = "bold", size = 7, hjust = 0.5)) +
-  labs(x= "Strains", y = "Total lipid titre")+
+  labs(x= "Strains", y = "Total lipids")+
   theme(legend.position = "none")+ theme(axis.title.x =element_blank())+ theme(axis.text.x =element_blank()) +
-  ggtitle("Total lipid titre")+
+  ggtitle("Total lipids")+
   theme(panel.grid.major = element_blank(), 
         panel.grid.minor = element_blank())+
   #panel.grid.minor = element_blank(),
@@ -784,5 +784,4 @@ Figure1 <- grid.arrange(Figure, legend, nrow = 2, layout_matrix = rbind(c(1,1), 
 ggsave(plot = Figure1, width = 170, height = 170, units = "mm", dpi = 300,filename = "Figures/Figure1.jpg")              
 
 #________________________________END____________________________________________________________
-
 

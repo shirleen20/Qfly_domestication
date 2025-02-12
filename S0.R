@@ -1,6 +1,6 @@
 #______________________________________24/01/2025_______________________________
 
-# Here we calculate fly weight weight differences and plot dry weight vs total lipid titre for 
+# Here we calculate fly weight weight differences and plot dry weight vs total lipids for 
 # the seven strains to generate Figure S1, Table S3, and Dataset S1.
 
 library("tidyverse")
@@ -207,9 +207,9 @@ Wt.plot <- DF.plot %>%
   facet_grid(~Age) +
   theme_bw()
 
-#__________Calculate total lipid titre and percent of fly weight due to lipid____________
+#__________Calculate total lipids and percent of fly weight due to lipid____________
 
-# Here we calc total lipid titre in mglipid/fly and SE for each strain and we calculate
+# Here we calc total lipids in mglipid/fly and SE for each strain and we calculate
 # percent of fly weight due to lipid and SE for each strain
 
 
@@ -258,7 +258,7 @@ TL.WT <- DF.new %>%
                 PL = as.numeric(PL), PLSE = as.numeric(PLSE),
                 WT = as.numeric(WT), WTSE = as.numeric(WTSE)) 
 
-#_____________make a correlation plot of weight vs total lipid titre_________
+#_____________make a correlation plot of weight vs total lipids_________
 
 pd = position_dodge(0.0005)
 
@@ -272,8 +272,8 @@ WT.TL_D1 <- TL.WT %>%
   facet_grid(~ Age)+
   theme(strip.background =element_rect(fill="white"))+
   theme(strip.text = element_text(colour = 'Black', size = 10))+
-  xlab(paste0("Fly weight")) +
-  ylab(paste0("Total lipids (mg)"))+
+  xlab(paste0("Fly weight (mg)")) +
+  ylab(paste0("Total lipids (mg/fly)"))+
   theme(legend.position="none")+
   theme(legend.text=element_text(size = 10))+
   theme(axis.title.y = element_text(face = "bold"), axis.title.x = element_text(face="bold")) + 
@@ -297,7 +297,7 @@ WT.TL_D19 <- TL.WT %>%
   theme(strip.background =element_rect(fill="white"))+
   theme(strip.text = element_text(colour = 'Black', size = 10))+
   xlab(paste0("Fly weight (mg)")) +
-  ylab(paste0("Total lipid titre"))+
+  ylab(paste0("Total lipids (mg/fly)"))+
   theme(legend.position="none")+
   theme(legend.text=element_text(size = 10))+
   theme(axis.title.y = element_text(face = "bold"), axis.title.x = element_text(face="bold")) + 
@@ -321,7 +321,7 @@ Legend1 <- TL.WT %>%
   theme(strip.background =element_rect(fill="white"))+
   theme(strip.text = element_text(colour = 'Black', size =8))+
   xlab(paste0("Fly weight (mg)")) +
-  ylab(paste0("Total lipid titre"))+
+  ylab(paste0("Total lipids (mg/fly)"))+
   theme(legend.position="bottom")+
   theme(legend.text=element_text(size = 8))+
   theme(axis.title.y = element_text(face = "bold"), axis.title.x = element_text(face="bold")) + 
@@ -344,7 +344,7 @@ legend <- get_legend(Legend1)
 Figure1 <- ggarrange(WT.TL_D1, WT.TL_D19, ncol = 2)
 
 Figure1_annotated <- annotate_figure(Figure1, bottom = text_grob("Dry weight (mg)", hjust = 0.5, face = "bold", size = 8),
-                                    left = text_grob("Total lipid titre", rot = 90, face = "bold", size = 8))
+                                    left = text_grob("Total lipids (mg/fly)", rot = 90, face = "bold", size = 8))
 
 Figure1_arranged <- grid.arrange(Figure1_annotated, legend, nrow = 2, layout_matrix = rbind(c(1,1), c(3,3)),
                                widths = c(2.7, 2.7), heights = c(2.5, 0.3))
@@ -375,10 +375,10 @@ PL.WT_D1 <- PL.WT %>%
   dplyr::filter(Age == "D1") %>% 
   dplyr::mutate(Strain = factor(as.factor(Strain), levels = c("CTnew","CTold", "SDnew","SDold","SDolder","CNnew","CNold"))) %>%
   ggplot(aes(Strain, PL))+ 
-  geom_point(mapping = aes(colour = Time, shape = Line), size = 4, position = pd) +
+  geom_point(mapping = aes(colour = Strain, shape = Strain), size = 4, position = pd) +
   theme_bw() +
   #geom_errorbar(aes(xmin = WT-WTSE, xmax = WT+WTSE, colour = Time), width =  0.0001, size  =  0.5, position = pd) +
-  geom_errorbar(aes(ymin=PL-PLSE, ymax=PL+PLSE,colour = Time), width =  0.0001, size  =  0.5, position = pd) +
+  geom_errorbar(aes(ymin=PL-PLSE, ymax=PL+PLSE,colour = Strain), width =  0.0001, size  =  0.5, position = pd) +
   facet_grid(~ Age)+
   theme(strip.background =element_rect(fill="white"))+
   theme(strip.text = element_text(colour = 'Black', size = 10))+
@@ -389,18 +389,20 @@ PL.WT_D1 <- PL.WT %>%
   theme(axis.title.y = element_text(face = "bold"), axis.title.x = element_text(face="bold")) + 
   theme(axis.text.y = element_text(size = 8), axis.text.x = element_text(size = 8)) + 
   theme(plot.title = element_text(face = "bold", hjust = 0.5, size = (12))) + theme(axis.title = element_text(size = 12))+
-  scale_colour_manual(values = c("New" = "deepskyblue", "Old" = "blue", "Older" = "red"))+
-  scale_shape_manual(values = c("CT" = 2, "CN" = 5, "SD" = 0)) +
+  scale_colour_manual(values = c("CTnew" = "red", "CTold" = "red","CNnew" = "green", "CNold" = "green",
+                                 "SDnew" = "blue","SDold" = "blue", "SDolder" = "blue")) +
+  scale_shape_manual(values = c("CTnew" = 16, "CTold" = 17,"CNnew" = 16, "CNold" = 17,
+                                "SDnew" = 16,"SDold" = 17, "SDolder" = 15)) +
   theme(axis.title.x=element_blank(), axis.title.y=element_blank()) 
 
 PL.WT_D19 <- PL.WT %>% 
   dplyr::filter(Age == "D19") %>% 
   dplyr::mutate(Strain = factor(as.factor(Strain), levels = c("CTnew","CTold", "SDnew","SDold","SDolder","CNnew","CNold"))) %>%
   ggplot(aes(Strain, PL))+ 
-  geom_point(mapping = aes(colour = Time, shape = Line), size = 4, position = pd) +
+  geom_point(mapping = aes(colour = Strain, shape  = Strain), size = 4, position = pd) +
   theme_bw() +
   #geom_errorbar(aes(xmin = WT-WTSE, xmax = WT+WTSE, colour = Time), width =  0.0001, size  =  0.5, position = pd) +
-  geom_errorbar(aes(ymin=PL-PLSE, ymax=PL+PLSE,colour = Time), width =  0.0001, size  =  0.5, position = pd) +
+  geom_errorbar(aes(ymin=PL-PLSE, ymax=PL+PLSE,colour = Strain), width =  0.0001, size  =  0.5, position = pd) +
   facet_grid(~ Age)+
   theme(strip.background =element_rect(fill="white"))+
   theme(strip.text = element_text(colour = 'Black', size = 10))+
@@ -411,19 +413,21 @@ PL.WT_D19 <- PL.WT %>%
   theme(axis.title.y = element_text(face = "bold"), axis.title.x = element_text(face="bold")) + 
   theme(axis.text.y = element_text(size = 8), axis.text.x = element_text(size = 8)) + 
   theme(plot.title = element_text(face = "bold", hjust = 0.5, size = (12))) + theme(axis.title = element_text(size = 12))+
-  scale_colour_manual(values = c("New" = "deepskyblue", "Old" = "blue", "Older" = "red"))+
-  scale_shape_manual(values = c("CT" = 2, "CN" = 5, "SD" = 0)) +
+  scale_colour_manual(values = c("CTnew" = "red", "CTold" = "red","CNnew" = "green", "CNold" = "green",
+                                 "SDnew" = "blue","SDold" = "blue", "SDolder" = "blue")) +
+  scale_shape_manual(values = c("CTnew" = 16, "CTold" = 17,"CNnew" = 16, "CNold" = 17,
+                                "SDnew" = 16,"SDold" = 17, "SDolder" = 15)) +
   theme(axis.title.x=element_blank(), axis.title.y=element_blank()) 
 
 Figure2 <- ggarrange(PL.WT_D1, PL.WT_D19, ncol = 2)
 
-Figure2_annotated <- annotate_figure(Figure2, bottom = text_grob("Strain", hjust = 0.5, face = "bold", size = 8),
-                                    left = text_grob("Lipid weight (%)", rot = 90, face = "bold", size = 8))
-
-#Figure2_arranged <- grid.arrange(Figure2_annotated, legend, nrow = 2, layout_matrix = rbind(c(1,1), c(3,3)),
-#                               widths = c(2.7, 2.7), heights = c(2.5, 0.3))
+Figure2_annotated <- annotate_figure(Figure2, bottom = text_grob("Strain", hjust = 0.5, face = "bold", size = 12),
+                                    left = text_grob("Lipid weight (%)", rot = 90, face = "bold", size = 12))
 
 #ggsave(plot = Figure2_arranged, width = 7.5, height = 3.5, units = "in", dpi = 300,filename = "Figures/Percent of fly weight due to lipids.jpg")              
+
+#Save Figure2_annotated as FigureS1
+ggsave(plot = Figure2_annotated, width = 8.0, height = 4.0, units = "in", dpi = 300, filename = "Figures/FigureS1.jpg")              
 
 
 #_______________________________________________________________________________________________
@@ -558,10 +562,8 @@ Figure3_arranged <- grid.arrange(Figure3_annotated, legend2, nrow = 2, layout_ma
 
 # Arrange and figures 1,2,3 
 
-FigureS1 <- ggarrange(Figure1_arranged, Figure2_annotated, Figure3_arranged, ncol = 1, nrow = 3,
-                      heights = c(1.6, 1, 1.6))
-
-ggsave(plot = FigureS1, width = 200, height = 210, units = "mm", dpi = 300, filename = "Figures/FigureS1.jpg")              
+#All_Figures <- ggarrange(Figure1_arranged, Figure2_annotated, Figure3_arranged, ncol = 1, nrow = 3,
+#                      heights = c(1.6, 1, 1.6))
 
 #________________________________________END_________________________________________
 
