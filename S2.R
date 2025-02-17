@@ -1,6 +1,6 @@
 #______________________________________24/01/2025_______________________________
 
-# We make Figure 1 
+# We make Figure 1 and Figure S1
 
 library("tidyverse")
 library("ggrepel")
@@ -21,21 +21,61 @@ Variables <- read_excel("data/Data_F1.xlsx")
 
 pd = position_dodge(0.4)
 
-p1.legend <- Variables %>% 
+#_____________________________Figure S1__________________________
+
+p <- Variables %>% 
   dplyr::select(Strains, Age, Wt, Wt.Se) %>% 
   dplyr::mutate(Strains = factor(as.factor(Strains), levels = c("CTnew","CTold","SDnew","SDold","SDolder","CNnew","CNold"))) %>%
   ggplot(aes(x = Strains, y = Wt)) +
-  geom_point(mapping = aes(colour = Strains, shape  = Strains), size = 1, position = pd) +
+  geom_point(mapping = aes(colour = Strains, shape  = Strains), size = 2, position = pd) +
   geom_errorbar(aes(ymin = Wt-Wt.Se, ymax = Wt+Wt.Se, colour = Strains), width = 0.001, size = 0.4, alpha = 0.5) +
   theme_bw() +
   facet_wrap(~Age) +
+  theme(axis.ticks.length=unit(0.015, "cm")) +
+  theme(axis.ticks=element_line(size= 0.05)) +
   theme(strip.text = element_blank()) +
   #theme(strip.background =element_rect(fill="white"))+
-  #theme(strip.text = element_text(colour = 'Black', size =7))+
+  #theme(strip.text = element_text(colour = 'Black', size =10))+
+  theme(axis.title   = element_text(face = "bold"),
+        axis.text    = element_text(face = "bold"),
+        plot.title = element_text(face = "bold", size = 12, hjust = 0.5)) +
+  labs(x= "Strains", y = "Fly weight")+
+  theme(legend.position = "bottom") +  guides(colour=guide_legend(nrow=1))+ 
+  theme(legend.text=element_text(size=8)) +
+  #theme(legend.title=element_text(size= 7), legend.text = element_text(size = (7))) +
+  theme(legend.title = element_blank())+ 
+  theme(axis.title.x =element_blank())+ theme(axis.text.x =element_blank()) +
+  ggtitle("Fly weight")+
+  theme(panel.grid.major = element_blank(), 
+        panel.grid.minor = element_blank())+
+  #panel.grid.minor = element_blank(),
+  #panel.border = element_rect(colour = "black", fill = NA, size=0.2))+
+  #theme(axis.text.y = element_text(face = "bold", size = 7))+
+  theme(axis.text.y = element_text(size = 10))+
+  theme(axis.title.y = element_blank())+
+  scale_y_continuous(breaks = seq(1.5, 5.5, by=1), limits=c(1.5,5.5)) +
+  scale_colour_manual(values = c("CTnew" = "red", "CTold" = "red","CNnew" = "green", "CNold" = "green",
+                                 "SDnew" = "blue","SDold" = "blue", "SDolder" = "blue")) +
+  scale_shape_manual(values = c("CTnew" = 16, "CTold" = 17,"CNnew" = 16, "CNold" = 17,
+                                "SDnew" = 16,"SDold" = 17, "SDolder" = 15)) 
+
+ggsave(plot = p, width = 8.0, height = 4.0, units = "in", dpi = 300,filename = "Figures/FigureS1.jpg")              
+
+#_____________________________Figure 1__________________________
+
+p1.legend <- Variables %>% 
+  dplyr::select(Strains, Age, Pt, Pt.Se) %>% 
+  dplyr::mutate(Strains = factor(as.factor(Strains), levels = c("CTnew","CTold","SDnew","SDold","SDolder","CNnew","CNold"))) %>%
+  ggplot(aes(x = Strains, y = Pt)) +
+  geom_point(mapping = aes(colour = Strains, shape  = Strains), size = 1, position = pd) +
+  geom_errorbar(aes(ymin = Pt-Pt.Se, ymax = Pt+Pt.Se, colour = Strains), width = 0.001, size = 0.4, alpha = 0.5) +
+  theme_bw() +
+  facet_wrap(~Age) +
+  theme(strip.text = element_blank()) +
   theme(axis.title   = element_text(face = "bold"),
         #axis.text    = element_text(face = "bold"),
         plot.title = element_text(hjust = 0.5)) +
-  labs(x= "Strains", y = "Fly weight (mg)")+
+  labs(x= "Strains", y = "Lipid weight (%)")+
   theme(legend.position = "bottom") +  guides(colour=guide_legend(nrow=1))+ 
   theme(legend.text=element_text(size=7)) +
   #theme(legend.title=element_text(size= 7), legend.text = element_text(size = (7))) +
@@ -47,17 +87,14 @@ p1.legend <- Variables %>%
   scale_shape_manual(values = c("CTnew" = 16, "CTold" = 17,"CNnew" = 16, "CNold" = 17,
                                 "SDnew" = 16,"SDold" = 17, "SDolder" = 15)) 
 
-#ggsave(plot = p1.legend, width = 8.0, height = 6.0, units = "in", dpi = 300,filename = "ScriptManuscript2/Figures/F1.legend.jpg")              
-
-
 p1 <- Variables %>% 
-  dplyr::select(Strains, Age, Wt, Wt.Se) %>% 
+  dplyr::select(Strains, Age, Pt, Pt.Se) %>% 
   dplyr::mutate(Strains = factor(as.factor(Strains), levels = c("CTnew","CTold","SDnew","SDold","SDolder","CNnew","CNold"))) %>%
-  ggplot(aes(x = Strains, y = Wt)) +
+  ggplot(aes(x = Strains, y = Pt)) +
   geom_point(mapping = aes(colour = Strains, shape  = Strains), size = 1, position = pd) +
-  geom_errorbar(aes(ymin = Wt-Wt.Se, ymax = Wt+Wt.Se, colour = Strains), width = 0.001, size = 0.4, alpha = 0.5) +
+  geom_errorbar(aes(ymin = Pt-Pt.Se, ymax = Pt+Pt.Se, colour = Strains), width = 0.001, size = 0.4, alpha = 0.5) +
   theme_bw() +
-  facet_wrap(~Age) +
+  facet_wrap(~Age) + 
   theme(axis.ticks.length=unit(0.015, "cm")) +
   theme(axis.ticks=element_line(size= 0.05)) +
   theme(strip.text = element_blank()) +
@@ -66,9 +103,9 @@ p1 <- Variables %>%
   theme(axis.title   = element_text(face = "bold"),
         axis.text    = element_text(face = "bold"),
         plot.title = element_text(face = "bold", size = 7, hjust = 0.5)) +
-  labs(x= "Strains", y = "Fly weight")+
+  labs(x= "Strains", y = "Lipid weight (%)")+
   theme(legend.position = "none")+ theme(axis.title.x =element_blank())+ theme(axis.text.x =element_blank()) +
-  ggtitle("Fly weight")+
+  ggtitle("Lipid weight (%)")+
   theme(panel.grid.major = element_blank(), 
         panel.grid.minor = element_blank())+
   #panel.grid.minor = element_blank(),
@@ -76,13 +113,11 @@ p1 <- Variables %>%
   #theme(axis.text.y = element_text(face = "bold", size = 7))+
   theme(axis.text.y = element_text(size = 7))+
   theme(axis.title.y = element_blank())+
-  scale_y_continuous(breaks = seq(1.5, 5.5, by=1), limits=c(1.5,5.5)) +
+  #scale_y_continuous(breaks = seq(1250, 2280, by=250), limits=c(1250, 2280)) +
   scale_colour_manual(values = c("CTnew" = "red", "CTold" = "red","CNnew" = "green", "CNold" = "green",
                                  "SDnew" = "blue","SDold" = "blue", "SDolder" = "blue")) +
   scale_shape_manual(values = c("CTnew" = 16, "CTold" = 17,"CNnew" = 16, "CNold" = 17,
                                 "SDnew" = 16,"SDold" = 17, "SDolder" = 15)) 
-
-#ggsave(plot = p1, width = 2.2, height = 1.2, units = "in", dpi = 300,filename = "ScriptManuscript2/Figures/F1.1.Flyweight.jpg")              
 
 p2 <- Variables %>% 
   dplyr::select(Strains, Age, TL, TL.SE) %>% 
@@ -115,9 +150,6 @@ p2 <- Variables %>%
                                  "SDnew" = "blue","SDold" = "blue", "SDolder" = "blue")) +
   scale_shape_manual(values = c("CTnew" = 16, "CTold" = 17,"CNnew" = 16, "CNold" = 17,
                                 "SDnew" = 16,"SDold" = 17, "SDolder" = 15)) 
-
-#ggsave(plot = p2, width = 2.2, height = 1.2, units = "in", dpi = 300,filename = "ScriptManuscript2/Figures/F1.2.TL.jpg")                
-
 
 #________________________________Plots for abundance_____________________________________
 
@@ -176,8 +208,6 @@ p3 <- Variables %>%
   scale_shape_manual(values = c("CTnew" = 16, "CTold" = 17,"CNnew" = 16, "CNold" = 17,
                                 "SDnew" = 16,"SDold" = 17, "SDolder" = 15))
 
-#ggsave(plot = p3, width = 2.2, height = 1.2, units = "in", dpi = 300,filename = "ScriptManuscript2/Figures/F1.3.NLsAb.jpg")                
-
 #______________________________________________
 # We need these functions to plot p4
 
@@ -231,8 +261,6 @@ p4 <- Variables %>%
                                  "SDnew" = "blue","SDold" = "blue", "SDolder" = "blue")) +
   scale_shape_manual(values = c("CTnew" = 16, "CTold" = 17,"CNnew" = 16, "CNold" = 17,
                                 "SDnew" = 16,"SDold" = 17, "SDolder" = 15))
-
-#ggsave(plot = p4, width = 2.2, height = 1.2, units = "in", dpi = 300,filename = "ScriptManuscript2/Figures/F1.4.PLsAb.jpg")              
 
 #______________________________________________
 # We need these functions to plot p5
@@ -288,8 +316,6 @@ p5 <- Variables %>%
   scale_shape_manual(values = c("CTnew" = 16, "CTold" = 17,"CNnew" = 16, "CNold" = 17,
                                 "SDnew" = 16,"SDold" = 17, "SDolder" = 15))
 
-#ggsave(plot = p5, width = 2.2, height = 1.2, units = "in", dpi = 300,filename = "ScriptManuscript2/Figures/F1.5.ELNLsAb.jpg")              
-
 
 # We need these functions to plot p6
 
@@ -344,8 +370,6 @@ p6 <- Variables %>%
   scale_shape_manual(values = c("CTnew" = 16, "CTold" = 17,"CNnew" = 16, "CNold" = 17,
                                 "SDnew" = 16,"SDold" = 17, "SDolder" = 15))
 
-#ggsave(plot = p6, width = 2.2, height = 1.2, units = "in", dpi = 300,filename = "ScriptManuscript2/Figures/F1.6.ELPLsAb.jpg")              
-
 
 #_____________________________________________Plots for carbon contents_________________________________________________________
 
@@ -381,7 +405,6 @@ p7 <- Variables %>%
   scale_shape_manual(values = c("CTnew" = 16, "CTold" = 17,"CNnew" = 16, "CNold" = 17,
                                 "SDnew" = 16,"SDold" = 17, "SDolder" = 15)) 
 
-#ggsave(plot = p7, width = 2.2, height = 1.2, units = "in", dpi = 300,filename = "ScriptManuscript2/Figures/F1.7.NLsCC.jpg")              
 
 p8 <- Variables %>% 
   dplyr::select(Strains, Age, PLs.CC, PLs.CC.SE) %>% 
@@ -415,7 +438,6 @@ p8 <- Variables %>%
   scale_shape_manual(values = c("CTnew" = 16, "CTold" = 17,"CNnew" = 16, "CNold" = 17,
                                 "SDnew" = 16,"SDold" = 17, "SDolder" = 15)) 
 
-#ggsave(plot = p8, width = 2.2, height = 1.2, units = "in", dpi = 300,filename = "ScriptManuscript2/Figures/F1.8.PLsCC.jpg")              
 
 p9 <- Variables %>% 
   dplyr::select(Strains, Age, ELNLs.AlkylCC , ELNLs.AlkylCC.SE) %>% 
@@ -450,7 +472,6 @@ p9 <- Variables %>%
   scale_shape_manual(values = c("CTnew" = 16, "CTold" = 17,"CNnew" = 16, "CNold" = 17,
                                 "SDnew" = 16,"SDold" = 17, "SDolder" = 15)) 
 
-#ggsave(plot = p9, width = 2.2, height = 1.2, units = "in", dpi = 300,filename = "ScriptManuscript2/Figures/F1.9.ELNLs.AlkylCC.jpg")              
 
 p10 <- Variables %>% 
   dplyr::select(Strains, Age, ELNLs.AcylCC , ELNLs.AcylCC.SE) %>% 
@@ -484,7 +505,6 @@ p10 <- Variables %>%
   scale_shape_manual(values = c("CTnew" = 16, "CTold" = 17,"CNnew" = 16, "CNold" = 17,
                                 "SDnew" = 16,"SDold" = 17, "SDolder" = 15)) 
 
-#ggsave(plot = p10, width = 2.2, height = 1.2, units = "in", dpi = 300,filename = "ScriptManuscript2/Figures/F1.10.ELNLs.AcylCC.jpg")              
 
 p11 <- Variables %>% 
   dplyr::select(Strains, Age, ELPLs.AlkylCC , ELPLs.AlkylCC.SE) %>% 
@@ -518,7 +538,6 @@ p11 <- Variables %>%
   scale_shape_manual(values = c("CTnew" = 16, "CTold" = 17,"CNnew" = 16, "CNold" = 17,
                                 "SDnew" = 16,"SDold" = 17, "SDolder" = 15)) 
 
-#ggsave(plot = p11, width = 2.2, height = 1.2, units = "in", dpi = 300,filename = "ScriptManuscript2/Figures/F1.11.ELPLs.AlkylCC.jpg")              
 
 p12 <- Variables %>% 
   dplyr::select(Strains, Age, ELPLs.AcylCC , ELPLs.AcylCC.SE) %>% 
@@ -551,8 +570,6 @@ p12 <- Variables %>%
                                  "SDnew" = "blue","SDold" = "blue", "SDolder" = "blue")) +
   scale_shape_manual(values = c("CTnew" = 16, "CTold" = 17,"CNnew" = 16, "CNold" = 17,
                                 "SDnew" = 16,"SDold" = 17, "SDolder" = 15)) 
-
-#ggsave(plot = p12, width = 2.2, height = 1.2, units = "in", dpi = 300,filename = "ScriptManuscript2/Figures/F1.12.ELPLs.AcylCC.jpg")              
 
 
 #______________________________________Plots for double bond contents___________________________________
@@ -589,7 +606,6 @@ p13 <- Variables %>%
   scale_shape_manual(values = c("CTnew" = 16, "CTold" = 17,"CNnew" = 16, "CNold" = 17,
                                 "SDnew" = 16,"SDold" = 17, "SDolder" = 15)) 
 
-#ggsave(plot = p13, width = 2.2, height = 1.2, units = "in", dpi = 300,filename = "ScriptManuscript2/Figures/F1.13.NLsDB.jpg")              
 
 p14 <- Variables %>% 
   dplyr::select(Strains, Age, PLs.DB, PLs.DB.SE) %>% 
@@ -623,7 +639,6 @@ p14 <- Variables %>%
   scale_shape_manual(values = c("CTnew" = 16, "CTold" = 17,"CNnew" = 16, "CNold" = 17,
                                 "SDnew" = 16,"SDold" = 17, "SDolder" = 15)) 
 
-#ggsave(plot = p14, width = 2.2, height = 1.2, units = "in", dpi = 300,filename = "ScriptManuscript2/Figures/F1.14.PLsDB.jpg")              
 
 p15 <- Variables %>% 
   dplyr::select(Strains, Age, ELNLs.AlkylDB , ELNLs.AlkylDB.SE) %>% 
@@ -658,7 +673,6 @@ p15 <- Variables %>%
   scale_shape_manual(values = c("CTnew" = 16, "CTold" = 17,"CNnew" = 16, "CNold" = 17,
                                 "SDnew" = 16,"SDold" = 17, "SDolder" = 15)) 
 
-#ggsave(plot = p15, width = 2.2, height = 1.2, units = "in", dpi = 300,filename = "ScriptManuscript2/Figures/F1.15.ELNLs.AlkylDB.jpg")              
 
 p16 <- Variables %>% 
   dplyr::select(Strains, Age, ELNLs.AcylDB , ELNLs.AcylDB.SE) %>% 
@@ -693,7 +707,6 @@ p16 <- Variables %>%
   scale_shape_manual(values = c("CTnew" = 16, "CTold" = 17,"CNnew" = 16, "CNold" = 17,
                                 "SDnew" = 16,"SDold" = 17, "SDolder" = 15)) 
 
-#ggsave(plot = p16, width = 2.2, height = 1.2, units = "in", dpi = 300,filename = "ScriptManuscript2/Figures/F1.16.ELNLs.AcylDB.jpg")              
 
 p17 <- Variables %>% 
   dplyr::select(Strains, Age, ELPLs.AlkylDB , ELPLs.AlkylDB.SE) %>% 
@@ -728,7 +741,6 @@ p17 <- Variables %>%
   scale_shape_manual(values = c("CTnew" = 16, "CTold" = 17,"CNnew" = 16, "CNold" = 17,
                                 "SDnew" = 16,"SDold" = 17, "SDolder" = 15)) 
 
-#ggsave(plot = p17, width = 2.2, height = 1.2, units = "in", dpi = 300,filename = "ScriptManuscript2/Figures/F1.17.ELPLs.AlkylDB.jpg")              
 
 p18 <- Variables %>% 
   dplyr::select(Strains, Age, ELPLs.AcylDB , ELPLs.AcylDB.SE) %>% 
@@ -763,11 +775,10 @@ p18 <- Variables %>%
   scale_shape_manual(values = c("CTnew" = 16, "CTold" = 17,"CNnew" = 16, "CNold" = 17,
                                 "SDnew" = 16,"SDold" = 17, "SDolder" = 15)) 
 
-#ggsave(plot = p18, width = 2.2, height = 1.2, units = "in", dpi = 300,filename = "ScriptManuscript2/Figures/F1.18.ELPLs.AcylDB.jpg")              
 
 #_______________________________Arrange all plots_____________________________________________
 
-F1 <- ggarrange(p1,p2,p3, nrow = 1, ncol=3)
+F1 <- ggarrange(p2,p1,p3, nrow = 1, ncol=3)
 F2 <- ggarrange(p4,p5,p6, nrow = 1, ncol=3)
 F3 <- ggarrange(p7,p8,p9, nrow = 1, ncol=3)
 F4 <- ggarrange(p10,p11,p12, nrow = 1, ncol=3)

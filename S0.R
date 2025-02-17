@@ -1,7 +1,7 @@
 #______________________________________24/01/2025_______________________________
 
-# Here we calculate fly weight weight differences and plot dry weight vs total lipids for 
-# the seven strains to generate Figure S1, Table S3, and Dataset S1.
+# Here we calculate fly weight weight differences and calculate total lipids per fly 
+# for the seven strains to generate Figure 1 (in Script S2.R), Table S3, and Dataset S1.
 
 library("tidyverse")
 library("ggrepel")
@@ -358,76 +358,76 @@ Figure1_arranged <- grid.arrange(Figure1_annotated, legend, nrow = 2, layout_mat
 
 #_____________Plot the percent of fly weight due to lipid_________________________
 
-PL.WT <- TL.WT %>% 
-  dplyr::mutate(LineTime = replace(LineTime, LineTime == "CT_New", "CTnew")) %>% 
-  dplyr::mutate(LineTime = replace(LineTime, LineTime == "CT_Old", "CTold")) %>% 
-  dplyr::mutate(LineTime = replace(LineTime, LineTime == "SD_New", "SDnew")) %>% 
-  dplyr::mutate(LineTime = replace(LineTime, LineTime == "SD_Old", "SDold")) %>% 
-  dplyr::mutate(LineTime = replace(LineTime, LineTime == "SD_Older", "SDolder")) %>% 
-  dplyr::mutate(LineTime= replace(LineTime, LineTime == "CN_New", "CNnew")) %>% 
-  dplyr::mutate(LineTime = replace(LineTime, LineTime == "CN_Old", "CNold")) %>% 
-  dplyr::mutate(Strain = LineTime) %>% 
-  dplyr::select(11,2,3,4,7,8)
-
-pd = position_dodge(0.4)
-
-PL.WT_D1 <- PL.WT %>% 
-  dplyr::filter(Age == "D1") %>% 
-  dplyr::mutate(Strain = factor(as.factor(Strain), levels = c("CTnew","CTold", "SDnew","SDold","SDolder","CNnew","CNold"))) %>%
-  ggplot(aes(Strain, PL))+ 
-  geom_point(mapping = aes(colour = Strain, shape = Strain), size = 4, position = pd) +
-  theme_bw() +
-  #geom_errorbar(aes(xmin = WT-WTSE, xmax = WT+WTSE, colour = Time), width =  0.0001, size  =  0.5, position = pd) +
-  geom_errorbar(aes(ymin=PL-PLSE, ymax=PL+PLSE,colour = Strain), width =  0.0001, size  =  0.5, position = pd) +
-  facet_grid(~ Age)+
-  theme(strip.background =element_rect(fill="white"))+
-  theme(strip.text = element_text(colour = 'Black', size = 10))+
-  xlab(paste0("Strain")) +
-  ylab(paste0("Fly weight due to lipids (%)"))+
-  theme(legend.position="none")+
-  theme(legend.text=element_text(size = 10))+
-  theme(axis.title.y = element_text(face = "bold"), axis.title.x = element_text(face="bold")) + 
-  theme(axis.text.y = element_text(size = 8), axis.text.x = element_text(size = 8)) + 
-  theme(plot.title = element_text(face = "bold", hjust = 0.5, size = (12))) + theme(axis.title = element_text(size = 12))+
-  scale_colour_manual(values = c("CTnew" = "red", "CTold" = "red","CNnew" = "green", "CNold" = "green",
-                                 "SDnew" = "blue","SDold" = "blue", "SDolder" = "blue")) +
-  scale_shape_manual(values = c("CTnew" = 16, "CTold" = 17,"CNnew" = 16, "CNold" = 17,
-                                "SDnew" = 16,"SDold" = 17, "SDolder" = 15)) +
-  theme(axis.title.x=element_blank(), axis.title.y=element_blank()) 
-
-PL.WT_D19 <- PL.WT %>% 
-  dplyr::filter(Age == "D19") %>% 
-  dplyr::mutate(Strain = factor(as.factor(Strain), levels = c("CTnew","CTold", "SDnew","SDold","SDolder","CNnew","CNold"))) %>%
-  ggplot(aes(Strain, PL))+ 
-  geom_point(mapping = aes(colour = Strain, shape  = Strain), size = 4, position = pd) +
-  theme_bw() +
-  #geom_errorbar(aes(xmin = WT-WTSE, xmax = WT+WTSE, colour = Time), width =  0.0001, size  =  0.5, position = pd) +
-  geom_errorbar(aes(ymin=PL-PLSE, ymax=PL+PLSE,colour = Strain), width =  0.0001, size  =  0.5, position = pd) +
-  facet_grid(~ Age)+
-  theme(strip.background =element_rect(fill="white"))+
-  theme(strip.text = element_text(colour = 'Black', size = 10))+
-  xlab(paste0("Strain")) +
-  ylab(paste0("Fly weight due to lipids (%)"))+
-  theme(legend.position="none")+
-  theme(legend.text=element_text(size = 10))+
-  theme(axis.title.y = element_text(face = "bold"), axis.title.x = element_text(face="bold")) + 
-  theme(axis.text.y = element_text(size = 8), axis.text.x = element_text(size = 8)) + 
-  theme(plot.title = element_text(face = "bold", hjust = 0.5, size = (12))) + theme(axis.title = element_text(size = 12))+
-  scale_colour_manual(values = c("CTnew" = "red", "CTold" = "red","CNnew" = "green", "CNold" = "green",
-                                 "SDnew" = "blue","SDold" = "blue", "SDolder" = "blue")) +
-  scale_shape_manual(values = c("CTnew" = 16, "CTold" = 17,"CNnew" = 16, "CNold" = 17,
-                                "SDnew" = 16,"SDold" = 17, "SDolder" = 15)) +
-  theme(axis.title.x=element_blank(), axis.title.y=element_blank()) 
-
-Figure2 <- ggarrange(PL.WT_D1, PL.WT_D19, ncol = 2)
-
-Figure2_annotated <- annotate_figure(Figure2, bottom = text_grob("Strain", hjust = 0.5, face = "bold", size = 12),
-                                    left = text_grob("Lipid weight (%)", rot = 90, face = "bold", size = 12))
-
-#ggsave(plot = Figure2_arranged, width = 7.5, height = 3.5, units = "in", dpi = 300,filename = "Figures/Percent of fly weight due to lipids.jpg")              
-
-#Save Figure2_annotated as FigureS1
-ggsave(plot = Figure2_annotated, width = 8.0, height = 4.0, units = "in", dpi = 300, filename = "Figures/FigureS1.jpg")              
+# PL.WT <- TL.WT %>% 
+   # dplyr::mutate(LineTime = replace(LineTime, LineTime == "CT_New", "CTnew")) %>% 
+   # dplyr::mutate(LineTime = replace(LineTime, LineTime == "CT_Old", "CTold")) %>% 
+   # dplyr::mutate(LineTime = replace(LineTime, LineTime == "SD_New", "SDnew")) %>% 
+   # dplyr::mutate(LineTime = replace(LineTime, LineTime == "SD_Old", "SDold")) %>% 
+   # dplyr::mutate(LineTime = replace(LineTime, LineTime == "SD_Older", "SDolder")) %>% 
+   # dplyr::mutate(LineTime= replace(LineTime, LineTime == "CN_New", "CNnew")) %>% 
+   # dplyr::mutate(LineTime = replace(LineTime, LineTime == "CN_Old", "CNold")) %>% 
+   # dplyr::mutate(Strain = LineTime) %>% 
+   # dplyr::select(11,2,3,4,7,8)
+# 
+# pd = position_dodge(0.4)
+# 
+# PL.WT_D1 <- PL.WT %>% 
+#   dplyr::filter(Age == "D1") %>% 
+#   dplyr::mutate(Strain = factor(as.factor(Strain), levels = c("CTnew","CTold", "SDnew","SDold","SDolder","CNnew","CNold"))) %>%
+#   ggplot(aes(Strain, PL))+ 
+#   geom_point(mapping = aes(colour = Strain, shape = Strain), size = 4, position = pd) +
+#   theme_bw() +
+#   #geom_errorbar(aes(xmin = WT-WTSE, xmax = WT+WTSE, colour = Time), width =  0.0001, size  =  0.5, position = pd) +
+#   geom_errorbar(aes(ymin=PL-PLSE, ymax=PL+PLSE,colour = Strain), width =  0.0001, size  =  0.5, position = pd) +
+#   facet_grid(~ Age)+
+#   theme(strip.background =element_rect(fill="white"))+
+#   theme(strip.text = element_text(colour = 'Black', size = 10))+
+#   xlab(paste0("Strain")) +
+#   ylab(paste0("Fly weight due to lipids (%)"))+
+#   theme(legend.position="none")+
+#   theme(legend.text=element_text(size = 10))+
+#   theme(axis.title.y = element_text(face = "bold"), axis.title.x = element_text(face="bold")) + 
+#   theme(axis.text.y = element_text(size = 8), axis.text.x = element_text(size = 8)) + 
+#   theme(plot.title = element_text(face = "bold", hjust = 0.5, size = (12))) + theme(axis.title = element_text(size = 12))+
+#   scale_colour_manual(values = c("CTnew" = "red", "CTold" = "red","CNnew" = "green", "CNold" = "green",
+#                                  "SDnew" = "blue","SDold" = "blue", "SDolder" = "blue")) +
+#   scale_shape_manual(values = c("CTnew" = 16, "CTold" = 17,"CNnew" = 16, "CNold" = 17,
+#                                 "SDnew" = 16,"SDold" = 17, "SDolder" = 15)) +
+#   theme(axis.title.x=element_blank(), axis.title.y=element_blank()) 
+# 
+# PL.WT_D19 <- PL.WT %>% 
+#   dplyr::filter(Age == "D19") %>% 
+#   dplyr::mutate(Strain = factor(as.factor(Strain), levels = c("CTnew","CTold", "SDnew","SDold","SDolder","CNnew","CNold"))) %>%
+#   ggplot(aes(Strain, PL))+ 
+#   geom_point(mapping = aes(colour = Strain, shape  = Strain), size = 4, position = pd) +
+#   theme_bw() +
+#   #geom_errorbar(aes(xmin = WT-WTSE, xmax = WT+WTSE, colour = Time), width =  0.0001, size  =  0.5, position = pd) +
+#   geom_errorbar(aes(ymin=PL-PLSE, ymax=PL+PLSE,colour = Strain), width =  0.0001, size  =  0.5, position = pd) +
+#   facet_grid(~ Age)+
+#   theme(strip.background =element_rect(fill="white"))+
+#   theme(strip.text = element_text(colour = 'Black', size = 10))+
+#   xlab(paste0("Strain")) +
+#   ylab(paste0("Fly weight due to lipids (%)"))+
+#   theme(legend.position="none")+
+#   theme(legend.text=element_text(size = 10))+
+#   theme(axis.title.y = element_text(face = "bold"), axis.title.x = element_text(face="bold")) + 
+#   theme(axis.text.y = element_text(size = 8), axis.text.x = element_text(size = 8)) + 
+#   theme(plot.title = element_text(face = "bold", hjust = 0.5, size = (12))) + theme(axis.title = element_text(size = 12))+
+#   scale_colour_manual(values = c("CTnew" = "red", "CTold" = "red","CNnew" = "green", "CNold" = "green",
+#                                  "SDnew" = "blue","SDold" = "blue", "SDolder" = "blue")) +
+#   scale_shape_manual(values = c("CTnew" = 16, "CTold" = 17,"CNnew" = 16, "CNold" = 17,
+#                                 "SDnew" = 16,"SDold" = 17, "SDolder" = 15)) +
+#   theme(axis.title.x=element_blank(), axis.title.y=element_blank()) 
+# 
+# Figure2 <- ggarrange(PL.WT_D1, PL.WT_D19, ncol = 2)
+# 
+# Figure2_annotated <- annotate_figure(Figure2, bottom = text_grob("Strain", hjust = 0.5, face = "bold", size = 12),
+#                                     left = text_grob("Lipid weight (%)", rot = 90, face = "bold", size = 12))
+# 
+# #ggsave(plot = Figure2_arranged, width = 7.5, height = 3.5, units = "in", dpi = 300,filename = "Figures/Percent of fly weight due to lipids.jpg")              
+# 
+# #Save Figure2_annotated 
+# ggsave(plot = Figure2_annotated, width = 8.0, height = 4.0, units = "in", dpi = 300, filename = "Figures/Figure.jpg")              
 
 
 #_______________________________________________________________________________________________
