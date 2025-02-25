@@ -105,7 +105,7 @@ p1 <- Variables %>%
         plot.title = element_text(face = "bold", size = 7, hjust = 0.5)) +
   labs(x= "Strains", y = "Lipid weight (%)")+
   theme(legend.position = "none")+ theme(axis.title.x =element_blank())+ theme(axis.text.x =element_blank()) +
-  ggtitle("Lipid weight (%)")+
+  ggtitle("Total lipids (%)")+
   theme(panel.grid.major = element_blank(), 
         panel.grid.minor = element_blank())+
   #panel.grid.minor = element_blank(),
@@ -137,7 +137,7 @@ p2 <- Variables %>%
         plot.title = element_text(face = "bold", size = 7, hjust = 0.5)) +
   labs(x= "Strains", y = "Total lipids")+
   theme(legend.position = "none")+ theme(axis.title.x =element_blank())+ theme(axis.text.x =element_blank()) +
-  ggtitle("Total lipids")+
+  ggtitle("Total lipids (mg)")+
   theme(panel.grid.major = element_blank(), 
         panel.grid.minor = element_blank())+
   #panel.grid.minor = element_blank(),
