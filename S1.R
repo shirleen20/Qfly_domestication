@@ -868,21 +868,25 @@ ClassEtherDB <- rbind(ClassDBAlkyl,ClassDBAcyl) #%>%
 #________________________________________________________________________________________________________________________
 
 
-#__________________________Make correlation plots for CC DB for ELNLs & NLs______________________________________________
+
+#____________Make correlation plots for CC in ELs to generate Figure 6_____________________________________________
+
 
 rm(list=ls())
 
+#_______________________________Correlation plots for CC at Day 1______________________________________________
+
+
 # 1. Make a correlation plot for mean CC in alkyl vs acyl chains in ELNLs.
 
-ELNLChainCC <- read_excel("ScriptManuscript2/MainTables/AlkylAcylENL_CC.xlsx") %>% 
+ELNLChainCC <- read_excel("data/data_plot/AlkylAcylENL_CC.xlsx") %>% 
   dplyr::rename(Alkyl = "ENLs (akyl)") %>% 
-  dplyr::rename(Acyl = "ENLs (acyl)") #%>% 
-#tidyr::pivot_longer(cols=c(Akyl, Acyl), names_to='Chain', values_to='CC') 
-
+  dplyr::rename(Acyl = "ENLs (acyl)") %>% 
+  dplyr::filter(Age == "Day 1")
 
 # make correlation plot 
 
-plotA_legend <- ELNLChainCC %>% 
+plot_legend <- ELNLChainCC %>% 
   dplyr::mutate(Alkyl = as.numeric(Alkyl)) %>% 
   dplyr::mutate(Acyl = as.numeric(Acyl)) %>% 
   dplyr::mutate(Strain = factor(as.factor(Strain), levels = c("CTnew","CTold", "SDnew","SDold","SDolder","CNnew","CNold"))) %>%
@@ -892,20 +896,26 @@ plotA_legend <- ELNLChainCC %>%
   geom_errorbar(aes(ymin=Alkyl-akylSE, ymax=Alkyl+akylSE,colour = Strain), width = 0.001, size = 0.2, alpha = 1) +
   geom_text_repel(aes(label = paste0(Strain)), size = 3, min.segment.length = 0, seed = 42, box.padding = 0.5) +
   stat_smooth(method = "lm",col = "#C42126", se = FALSE,size = 0.5)+
-  labs(x= "Acyl chain carbons ENL", y = "Alkyl chain carbons")+
+  labs(x= "Acyl chain(s)", y = "Alk(en)yl chain")+
+  ggtitle("Ether neutral lipids") +
   theme_bw()+
+  #scale_y_continuous(labels = scales::number_format(accuracy = 0.1)) +
   theme(axis.title.y = element_text(face = "bold", size = 8), axis.title.x = element_text(face="bold", size = 8))+
   theme(axis.text.y = element_text(face = "bold", size = 8), axis.text.x = element_text(face="bold", size = 8))+
   theme(legend.position = "bottom") +  guides(colour=guide_legend(nrow=1))+
+  theme(plot.title = element_text(size = 12, face = "bold", hjust = 0.5))+
   theme(legend.title=element_text(size= 8), legend.text = element_text(size = (8))) + 
   theme(axis.title = element_text(size = 10)) +
-  #facet_grid(~ Age)+
-  facet_grid(Age ~ .)+
-  theme(strip.background =element_rect(fill="Black"))+
-  theme(strip.text = element_text(colour = 'white', size = 8))+
-  stat_cor(aes(label = ..rr.label..), color = "black", geom = "label", size = 3)
+  #scale_y_continuous(limits = c(17.5, 20.5, by = 0.5))+
+  scale_y_continuous(limits = c(17.5, 20.5, by = 0.5),labels = scales::number_format(accuracy = 0.1))+
+  stat_cor(aes(), color = "black", geom = "label", size = 2.5)
 
-plotA <- ELNLChainCC %>% 
+#________________________DAY 1 PLOTS Acyl vs Alk(en)yl CC_____________________________
+
+
+# Make plots for D1
+
+plotENL <- ELNLChainCC %>% 
   dplyr::mutate(Alkyl = as.numeric(Alkyl)) %>% 
   dplyr::mutate(Acyl = as.numeric(Acyl)) %>% 
   dplyr::mutate(Strain = factor(as.factor(Strain), levels = c("CTnew","CTold", "SDnew","SDold","SDolder","CNnew","CNold"))) %>%
@@ -915,32 +925,29 @@ plotA <- ELNLChainCC %>%
   geom_errorbar(aes(ymin=Alkyl-akylSE, ymax=Alkyl+akylSE,colour = Strain), width = 0.001, size = 0.2, alpha = 1) +
   geom_text_repel(aes(label = paste0(Strain)), size = 3, min.segment.length = 0, seed = 42, box.padding = 0.5) +
   stat_smooth(method = "lm",col = "#C42126", se = FALSE,size = 0.5)+
-  labs(x= "Acyl chain carbons ENL", y = "Alkyl chain carbons")+
+  labs(x= "Acyl chain(s)", y = "Alk(en)yl chain")+
+  ggtitle("Ether neutral lipids") +
   theme_bw()+
+  scale_y_continuous(limits = c(18.1, 20.1, by = 0.5),labels = scales::number_format(accuracy = 0.1))+
   theme(axis.title.y = element_text(face = "bold", size = 8), axis.title.x = element_text(face="bold", size = 8))+
   theme(axis.text.y = element_text(face = "bold", size = 8), axis.text.x = element_text(face="bold", size = 8))+
-  theme(legend.position = "none") +  
+  theme(legend.position = "none") + guides(colour=guide_legend(nrow=1)) + 
+  theme(plot.title = element_text(size = 12, face = "bold", hjust = 0.5))+
   theme(legend.title=element_text(size= 8), legend.text = element_text(size = (8))) + 
   theme(axis.title = element_text(size = 10)) +
-  #facet_grid(~ Age)+
-  facet_grid(Age ~ .)+
-  theme(strip.background =element_rect(fill="White"))+
-  theme(strip.text = element_text(colour = 'Black', size = 8))+
-  #stat_cor(aes(label = ..rr.label..), color = "black", geom = "label", size = 3)+
-  stat_cor(aes(), color = "black", geom = "label", size = 2.5)
-
-#ggsave(plot = plotA, width = 6, height = 4, units = "in", dpi = 300,filename = "ScriptManuscript2/Figures/Alkyl_vs_Acyl_Correlation_plot_ENLCC.jpg")                
-
+  stat_cor(aes(), color = "black", geom = "label", size = 2.5, label.y = 20.1) +
+  theme(axis.title.x=element_blank(), axis.title.y=element_blank())
 
 #____________________
 
 # 2. Make a correlation plot for mean CC in alkyl vs acyl chains in EPLs.
 
-EPLChainCC <- read_excel("ScriptManuscript2/MainTables/AlkylAcylEPL_CC.xlsx") %>% 
+EPLChainCC <- read_excel("data/data_plot/AlkylAcylEPL_CC.xlsx") %>% 
   dplyr::rename(Alkyl = "EPLs (akyl)") %>% 
-  dplyr::rename(Acyl = "EPLs (acyl)") 
+  dplyr::rename(Acyl = "EPLs (acyl)") %>% 
+  dplyr::filter(Age == "Day 1")
 
-plotB <- EPLChainCC %>% 
+plotEPL <- EPLChainCC %>% 
   dplyr::mutate(Alkyl = as.numeric(Alkyl)) %>% 
   dplyr::mutate(Acyl = as.numeric(Acyl)) %>% 
   dplyr::mutate(Strain = factor(as.factor(Strain), levels = c("CTnew","CTold", "SDnew","SDold","SDolder","CNnew","CNold"))) %>%
@@ -950,23 +957,87 @@ plotB <- EPLChainCC %>%
   geom_errorbar(aes(ymin=Alkyl-akylSE, ymax=Alkyl+akylSE,colour = Strain), width = 0.001, size = 0.2, alpha = 1) +
   geom_text_repel(aes(label = paste0(Strain)), size = 3, min.segment.length = 0, seed = 42, box.padding = 0.5, max.overlaps = Inf) +
   stat_smooth(method = "lm",col = "#C42126", se = FALSE,size = 0.5)+
-  labs(x= "Acyl chain carbons EPL", y = "Alkyl chain carbons")+
+  labs(x= "Acyl chain(s)", y = "Alk(en)yl chain")+
+  ggtitle("Ether phospholipids") +
   theme_bw()+
-  theme(axis.title.y = element_blank(), axis.title.x = element_text(face="bold", size = 8))+
-  #theme(axis.title.y = element_text(face = "bold", size = 8), axis.title.x = element_text(face="bold", size = 8))+
+  theme(plot.title = element_text(size = 12, face = "bold", hjust = 0.25))+
+  scale_y_continuous(limits = c(14.1, 14.4, by = 0.2),labels = scales::number_format(accuracy = 0.1))+
+  theme(axis.title.y = element_text(face = "bold", size = 8), axis.title.x = element_text(face="bold", size = 8))+
   theme(axis.text.y = element_text(face = "bold", size = 8), axis.text.x = element_text(face="bold", size = 8))+
-  theme(legend.position = "none") + 
+  theme(legend.position = "none") + guides(colour=guide_legend(nrow=1)) + 
   theme(legend.title=element_text(size= 8), legend.text = element_text(size = (8))) + 
   theme(axis.title = element_text(size = 10)) +
-  #facet_grid(~ Age)+
-  facet_grid(Age ~ .)+
-  theme(strip.background =element_rect(fill="white"))+
-  theme(strip.text = element_text(colour = 'Black', size = 8))+
-  #stat_cor(aes(label = ..rr.label..), color = "black", geom = "label", size = 3)+
-  stat_cor(aes(), color = "black", geom = "label", size = 2.5)
+  stat_cor(aes(), color = "black", geom = "label", size = 2.5, label.y = 14.4) +
+  theme(axis.title.x=element_blank(), axis.title.y=element_blank())
 
 
-#ggsave(plot = plotB, width = 6, height = 4, units = "in", dpi = 300,filename = "ScriptManuscript2/Figures/Alkyl_vs_Acyl_Correlation_plot_EPLCC.jpg")                
+#____________________________Correlation plots for CC for EPL classes____________________________
+
+# make correlation plot for PEe
+
+CC_PEe <- read_excel("data/data_plot/CC_EPLClasses.xlsx") %>% 
+  dplyr::select(1,2,3,6,7,12,13) %>% 
+  dplyr::rename(Alkyl = "PEe(alkyl)") %>% 
+  dplyr::rename(Acyl = "PEe(acyl)") %>% 
+  dplyr::rename(alkylSE = "PEe_se(alkyl)") %>% 
+  dplyr::rename(acylSE = "PEe_se(acyl)") %>% 
+  dplyr::filter(Age == "1 Day")
+
+plotPEe <- CC_PEe %>% 
+  dplyr::mutate(Alkyl = as.numeric(Alkyl)) %>% 
+  dplyr::mutate(Acyl = as.numeric(Acyl)) %>% 
+  dplyr::mutate(Strain = factor(as.factor(Strain), levels = c("CTnew","CTold", "SDnew","SDold","SDolder","CNnew","CNold"))) %>%
+  ggplot(aes(Acyl, Alkyl, colour = Strain))+
+  geom_point()+ 
+  geom_errorbar(aes(xmin=Acyl-acylSE, xmax=Acyl+acylSE,colour = Strain), width = 0.001, size = 0.2, alpha = 1) +
+  geom_errorbar(aes(ymin=Alkyl-alkylSE, ymax=Alkyl+alkylSE,colour = Strain), width = 0.001, size = 0.2, alpha = 1) +
+  geom_text_repel(aes(label = paste0(Strain)), size = 3, min.segment.length = 0, seed = 42, box.padding = 0.5) +
+  stat_smooth(method = "lm",col = "#C42126", se = FALSE,size = 0.5)+
+  labs(x= "Acyl chain(s)", y = "Alk(en)yl chain")+
+  ggtitle("PEe") +
+  theme_bw()+
+  theme(plot.title = element_text(size = 12, face = "bold", hjust = 0.5))+
+  scale_y_continuous(limits = c(15.2, 15.8, by = 0.1),labels = scales::number_format(accuracy = 0.1))+
+  theme(axis.title.y = element_text(face = "bold", size = 8), axis.title.x = element_text(face="bold", size = 8))+
+  theme(axis.text.y = element_text(face = "bold", size = 8), axis.text.x = element_text(face="bold", size = 8))+
+  theme(legend.position = "none") +  guides(colour=guide_legend(nrow=1)) + 
+  theme(legend.title=element_text(size= 8), legend.text = element_text(size = (8))) + 
+  theme(axis.title = element_text(size = 10)) +
+  stat_cor(aes(), color = "black", geom = "label", size = 2.5, label.y = 15.8) +
+  theme(axis.title.x=element_blank(), axis.title.y=element_blank())
+
+# 3.make correlation plot for PEp
+
+CC_PEp <- read_excel("data/data_plot/CC_EPLClasses.xlsx") %>% 
+  dplyr::select(1,2,3,8,9,14,15) %>% 
+  dplyr::rename(Alkyl = "PEp(alkyl)") %>% 
+  dplyr::rename(Acyl = "PEp(acyl)") %>% 
+  dplyr::rename(alkylSE = "PEp_se(alkyl)") %>% 
+  dplyr::rename(acylSE = "PEp_se(acyl)")  %>% 
+  dplyr::filter(Age == "1 Day")
+
+plotPEp <- CC_PEp %>% 
+  dplyr::mutate(Alkyl = as.numeric(Alkyl)) %>% 
+  dplyr::mutate(Acyl = as.numeric(Acyl)) %>% 
+  dplyr::mutate(Strain = factor(as.factor(Strain), levels = c("CTnew","CTold", "SDnew","SDold","SDolder","CNnew","CNold"))) %>%
+  ggplot(aes(Acyl, Alkyl, colour = Strain))+
+  geom_point()+ 
+  geom_errorbar(aes(xmin=Acyl-acylSE, xmax=Acyl+acylSE,colour = Strain), width = 0.001, size = 0.2, alpha = 1) +
+  geom_errorbar(aes(ymin=Alkyl-alkylSE, ymax=Alkyl+alkylSE,colour = Strain), width = 0.001, size = 0.2, alpha = 1) +
+  geom_text_repel(aes(label = paste0(Strain)), size = 3, min.segment.length = 0, seed = 42, box.padding = 0.5) +
+  stat_smooth(method = "lm",col = "#C42126", se = FALSE,size = 0.5)+
+  labs(x= "Acyl chain(s)", y = "Alk(en)yl chain")+
+  ggtitle("PEp") +
+  theme_bw()+
+  theme(plot.title = element_text(size = 12, face = "bold", hjust = 0.5))+
+  scale_y_continuous(limits = c(13.15, 13.5, by = 0.1),labels = scales::number_format(accuracy = 0.1))+
+  theme(axis.title.y = element_text(face = "bold", size = 8), axis.title.x = element_text(face="bold", size = 8))+
+  theme(axis.text.y = element_text(face = "bold", size = 8), axis.text.x = element_text(face="bold", size = 8))+
+  theme(legend.position = "none") + guides(colour=guide_legend(nrow=1)) +  
+  theme(legend.title=element_text(size= 8), legend.text = element_text(size = (8))) + 
+  theme(axis.title = element_text(size = 10)) +
+  stat_cor(aes(), color = "black", geom = "label", size = 2.5, label.y = 13.5) +
+  theme(axis.title.x=element_blank(), axis.title.y=element_blank())
 
 
 #Arrange and save the correlation plots for CC
@@ -978,29 +1049,200 @@ get_legend<-function(myggplot){
   return(legend)
 }
 
-legend <- get_legend(plotA_legend)
+legend <- get_legend(plot_legend)
 
-Figure6 <- grid.arrange(plotA, plotB, legend, ncol=2, nrow = 2, layout_matrix = rbind(c(1,2), c(3,3)),
-                        widths = c(2.7, 2.7), heights = c(2.5, 0.2))
+#___
+#Arrange and save D1 plots 
 
-# Save Figure 6
+Plot1 <- ggarrange(plotENL,plotEPL, plotPEe, plotPEp, ncol = 4)
 
-#ggsave(plot = Figure1, width = 9, height = 6, units = "in", dpi = 300,filename = "ScriptManuscript2/Figures/Figure6_Alkyl_vs_Acyl_CC_Correlation_plot_ELs.jpg")              
+Plot1_annotated <- annotate_figure(Plot1, top = text_grob("Day 1", hjust = 0.5, face = "bold", size = 14))
+#                bottom = text_grob("Acyl chain(s)", hjust = 0.5, face = "bold", size = 12),
+#                left = text_grob("Alk(en)yl chain", rot = 90, face = "bold", size = 12))
 
-#_______________________________________________________________________________________________________________
 
-#_______________________Correlation plot for mean DB in alkyl vs acyl chains in ELNLs___________________________
+#_______________________________Correlation plots for CC at Day 19______________________________________________
 
-# 3. Make a correlation plot for mean DB in alkyl vs acyl chains in ELNLs.
 
-ELNLChainDB <- read_excel("ScriptManuscript2/MainTables/AlkylAcylENL_DB.xlsx") %>% 
+# 1. Make a correlation plot for mean CC in alkyl vs acyl chains in ELNLs.
+
+ELNLChainCC <- read_excel("data/data_plot/AlkylAcylENL_CC.xlsx") %>% 
   dplyr::rename(Alkyl = "ENLs (akyl)") %>% 
-  dplyr::rename(Acyl = "ENLs (acyl)") 
+  dplyr::rename(Acyl = "ENLs (acyl)") %>% 
+  dplyr::filter(Age == "Day 19")
 
 
-# make correlation plot 
+#________________________DAY 1 PLOTS Acyl vs Alk(en)yl CC_____________________________
 
-plotC <- ELNLChainDB %>% 
+
+# Make plots for D19
+
+plotENL <- ELNLChainCC %>% 
+  dplyr::mutate(Alkyl = as.numeric(Alkyl)) %>% 
+  dplyr::mutate(Acyl = as.numeric(Acyl)) %>% 
+  dplyr::mutate(Strain = factor(as.factor(Strain), levels = c("CTnew","CTold", "SDnew","SDold","SDolder","CNnew","CNold"))) %>%
+  ggplot(aes(Acyl, Alkyl, colour = Strain))+
+  geom_point()+ 
+  geom_errorbar(aes(xmin=Acyl-acylSE, xmax=Acyl+acylSE,colour = Strain), width = 0.001, size = 0.2, alpha = 1) +
+  geom_errorbar(aes(ymin=Alkyl-akylSE, ymax=Alkyl+akylSE,colour = Strain), width = 0.001, size = 0.2, alpha = 1) +
+  geom_text_repel(aes(label = paste0(Strain)), size = 3, min.segment.length = 0, seed = 42, box.padding = 0.5) +
+  stat_smooth(method = "lm",col = "#C42126", se = FALSE,size = 0.5)+
+  labs(x= "Acyl chain(s)", y = "Alk(en)yl chain")+
+  #ggtitle("Ether neutral lipids") +
+  theme_bw()+
+  scale_y_continuous(limits = c(17.0, 20.0, by = 1),labels = scales::number_format(accuracy = 0.1))+
+  theme(axis.title.y = element_text(face = "bold", size = 8), axis.title.x = element_text(face="bold", size = 8))+
+  theme(axis.text.y = element_text(face = "bold", size = 8), axis.text.x = element_text(face="bold", size = 8))+
+  theme(legend.position = "none") + guides(colour=guide_legend(nrow=1)) + 
+  theme(plot.title = element_text(size = 12, face = "bold", hjust = 0.5))+
+  theme(legend.title=element_text(size= 8), legend.text = element_text(size = (8))) + 
+  theme(axis.title = element_text(size = 10)) +
+  stat_cor(aes(), color = "black", geom = "label", size = 2.5, label.y = 20.0) +
+  theme(axis.title.x=element_blank(), axis.title.y=element_blank())
+
+#____________________
+
+# 2. Make a correlation plot for mean CC in alkyl vs acyl chains in EPLs.
+
+EPLChainCC <- read_excel("data/data_plot/AlkylAcylEPL_CC.xlsx") %>% 
+  dplyr::rename(Alkyl = "EPLs (akyl)") %>% 
+  dplyr::rename(Acyl = "EPLs (acyl)") %>% 
+  dplyr::filter(Age == "Day 19")
+
+plotEPL <- EPLChainCC %>% 
+  dplyr::mutate(Alkyl = as.numeric(Alkyl)) %>% 
+  dplyr::mutate(Acyl = as.numeric(Acyl)) %>% 
+  dplyr::mutate(Strain = factor(as.factor(Strain), levels = c("CTnew","CTold", "SDnew","SDold","SDolder","CNnew","CNold"))) %>%
+  ggplot(aes(Acyl, Alkyl, colour = Strain))+
+  geom_point()+ 
+  geom_errorbar(aes(xmin=Acyl-acylSE, xmax=Acyl+acylSE,colour = Strain), width = 0.001, size = 0.2, alpha = 1) +
+  geom_errorbar(aes(ymin=Alkyl-akylSE, ymax=Alkyl+akylSE,colour = Strain), width = 0.001, size = 0.2, alpha = 1) +
+  geom_text_repel(aes(label = paste0(Strain)), size = 3, min.segment.length = 0, seed = 42, box.padding = 0.5, max.overlaps = Inf) +
+  stat_smooth(method = "lm",col = "#C42126", se = FALSE,size = 0.5)+
+  labs(x= "Acyl chain(s)", y = "Alk(en)yl chain")+
+  #ggtitle("Ether phospholipids") +
+  theme_bw()+
+  theme(plot.title = element_text(size = 12, face = "bold", hjust = 0.25))+
+  scale_y_continuous(limits = c(13.8, 14.1, by = 0.1),labels = scales::number_format(accuracy = 0.1))+
+  theme(axis.title.y = element_text(face = "bold", size = 8), axis.title.x = element_text(face="bold", size = 8))+
+  theme(axis.text.y = element_text(face = "bold", size = 8), axis.text.x = element_text(face="bold", size = 8))+
+  theme(legend.position = "none") + guides(colour=guide_legend(nrow=1)) + 
+  theme(legend.title=element_text(size= 8), legend.text = element_text(size = (8))) + 
+  theme(axis.title = element_text(size = 10)) +
+  stat_cor(aes(), color = "black", geom = "label", size = 2.5, label.y = 14.1) +
+  theme(axis.title.x=element_blank(), axis.title.y=element_blank())
+
+
+#____________________________Correlation plots for CC for EPL classes____________________________
+
+# make correlation plot for PEe
+
+CC_PEe <- read_excel("data/data_plot/CC_EPLClasses.xlsx") %>% 
+  dplyr::select(1,2,3,6,7,12,13) %>% 
+  dplyr::rename(Alkyl = "PEe(alkyl)") %>% 
+  dplyr::rename(Acyl = "PEe(acyl)") %>% 
+  dplyr::rename(alkylSE = "PEe_se(alkyl)") %>% 
+  dplyr::rename(acylSE = "PEe_se(acyl)") %>% 
+  dplyr::filter(Age == "19 Day")
+
+plotPEe <- CC_PEe %>% 
+  dplyr::mutate(Alkyl = as.numeric(Alkyl)) %>% 
+  dplyr::mutate(Acyl = as.numeric(Acyl)) %>% 
+  dplyr::mutate(Strain = factor(as.factor(Strain), levels = c("CTnew","CTold", "SDnew","SDold","SDolder","CNnew","CNold"))) %>%
+  ggplot(aes(Acyl, Alkyl, colour = Strain))+
+  geom_point()+ 
+  geom_errorbar(aes(xmin=Acyl-acylSE, xmax=Acyl+acylSE,colour = Strain), width = 0.001, size = 0.2, alpha = 1) +
+  geom_errorbar(aes(ymin=Alkyl-alkylSE, ymax=Alkyl+alkylSE,colour = Strain), width = 0.001, size = 0.2, alpha = 1) +
+  geom_text_repel(aes(label = paste0(Strain)), size = 3, min.segment.length = 0, seed = 42, box.padding = 0.5) +
+  stat_smooth(method = "lm",col = "#C42126", se = FALSE,size = 0.5)+
+  labs(x= "Acyl chain(s)", y = "Alk(en)yl chain")+
+  #ggtitle("PEe") +
+  theme_bw()+
+  theme(plot.title = element_text(size = 12, face = "bold", hjust = 0.5))+
+  scale_y_continuous(limits = c(15.9, 16.6, by = 0.2),labels = scales::number_format(accuracy = 0.1))+
+  theme(axis.title.y = element_text(face = "bold", size = 8), axis.title.x = element_text(face="bold", size = 8))+
+  theme(axis.text.y = element_text(face = "bold", size = 8), axis.text.x = element_text(face="bold", size = 8))+
+  theme(legend.position = "none") +  guides(colour=guide_legend(nrow=1)) + 
+  theme(legend.title=element_text(size= 8), legend.text = element_text(size = (8))) + 
+  theme(axis.title = element_text(size = 10)) +
+  stat_cor(aes(), color = "black", geom = "label", size = 2.5, label.y = 16.6) +
+  theme(axis.title.x=element_blank(), axis.title.y=element_blank())
+
+# 3.make correlation plot for PEp
+
+CC_PEp <- read_excel("data/data_plot/CC_EPLClasses.xlsx") %>% 
+  dplyr::select(1,2,3,8,9,14,15) %>% 
+  dplyr::rename(Alkyl = "PEp(alkyl)") %>% 
+  dplyr::rename(Acyl = "PEp(acyl)") %>% 
+  dplyr::rename(alkylSE = "PEp_se(alkyl)") %>% 
+  dplyr::rename(acylSE = "PEp_se(acyl)")  %>% 
+  dplyr::filter(Age == "19 Day")
+
+plotPEp <- CC_PEp %>% 
+  dplyr::mutate(Alkyl = as.numeric(Alkyl)) %>% 
+  dplyr::mutate(Acyl = as.numeric(Acyl)) %>% 
+  dplyr::mutate(Strain = factor(as.factor(Strain), levels = c("CTnew","CTold", "SDnew","SDold","SDolder","CNnew","CNold"))) %>%
+  ggplot(aes(Acyl, Alkyl, colour = Strain))+
+  geom_point()+ 
+  geom_errorbar(aes(xmin=Acyl-acylSE, xmax=Acyl+acylSE,colour = Strain), width = 0.001, size = 0.2, alpha = 1) +
+  geom_errorbar(aes(ymin=Alkyl-alkylSE, ymax=Alkyl+alkylSE,colour = Strain), width = 0.001, size = 0.2, alpha = 1) +
+  geom_text_repel(aes(label = paste0(Strain)), size = 3, min.segment.length = 0, seed = 42, box.padding = 0.5) +
+  stat_smooth(method = "lm",col = "#C42126", se = FALSE,size = 0.5)+
+  labs(x= "Acyl chain(s)", y = "Alk(en)yl chain")+
+  #ggtitle("PEp") +
+  theme_bw()+
+  theme(plot.title = element_text(size = 12, face = "bold", hjust = 0.5))+
+  scale_y_continuous(limits = c(12.7, 13.0, by = 0.5),labels = scales::number_format(accuracy = 0.1))+
+  theme(axis.title.y = element_text(face = "bold", size = 8), axis.title.x = element_text(face="bold", size = 8))+
+  theme(axis.text.y = element_text(face = "bold", size = 8), axis.text.x = element_text(face="bold", size = 8))+
+  theme(legend.position = "none") + guides(colour=guide_legend(nrow=1)) +  
+  theme(legend.title=element_text(size= 8), legend.text = element_text(size = (8))) + 
+  theme(axis.title = element_text(size = 10)) +
+  stat_cor(aes(), color = "black", geom = "label", size = 2.5, label.y = 13.0) +
+  theme(axis.title.x=element_blank(), axis.title.y=element_blank())
+
+#___
+#Arrange and save D19 plots 
+
+Plot2 <- ggarrange(plotENL,plotEPL, plotPEe, plotPEp, ncol = 4)
+
+Plot2_annotated <- annotate_figure(Plot2, top = text_grob("Day 19", hjust = 0.5, face = "bold", size = 14))
+
+#___
+# Combine and save plot for D1 and D19 into one Figure
+
+Figure <- ggarrange(Plot1_annotated, Plot2_annotated, nrow = 2)
+
+Figure_annotated <- annotate_figure(Figure,
+                                    #                                  top = text_grob("Day 1", hjust = 0.5, face = "bold", size = 14))
+                                    bottom = text_grob("Acyl chain(s)", hjust = 0.5, face = "bold", size = 12),
+                                    left = text_grob("Alk(en)yl chain", rot = 90, face = "bold", size = 12))
+
+
+Figure_arranged <- grid.arrange(Figure_annotated, legend, nrow = 2, layout_matrix = rbind(c(1,1), c(3,3)),
+                                widths = c(2.7, 2.7), heights = c(2.5, 0.2))
+
+
+
+ggsave(plot = Figure_arranged, width = 9.0, height = 6.0, units = "in", dpi = 300,filename = "Figures/Figure6.jpg")              
+
+
+
+#____________Make correlation plots for DB in ELs to generate Figure S2_____________________________________________
+
+
+rm(list=ls())
+
+#_______________________________Correlation plots for DB at Day 1______________________________________________
+
+#Make a correlation plot for mean DB in alkyl vs acyl chains in ELNLs.
+
+ELNLChainDB1 <- read_excel("data/data_plot/AlkylAcylENL_DB.xlsx") %>% 
+  dplyr::rename(Alkyl = "ENLs (akyl)") %>% 
+  dplyr::rename(Acyl = "ENLs (acyl)")  %>% 
+  dplyr::filter(Age == "Day 1")
+
+plotELNLDB1 <- ELNLChainDB1 %>% 
   dplyr::mutate(Alkyl = as.numeric(Alkyl)) %>% 
   dplyr::mutate(Acyl = as.numeric(Acyl)) %>% 
   dplyr::mutate(Strain = factor(as.factor(Strain), levels = c("CTnew","CTold", "SDnew","SDold","SDolder","CNnew","CNold"))) %>%
@@ -1011,34 +1253,111 @@ plotC <- ELNLChainDB %>%
   geom_text_repel(aes(label = paste0(Strain)), size = 3, min.segment.length = 0, seed = 42, box.padding = 0.5) +
   stat_smooth(method = "lm",col = "#C42126", se = FALSE,size = 0.5)+
   labs(x= "Acyl chain double bonds ENL", y = "Alkyl chain double bonds")+
+  ggtitle("Ether neutral lipids") +
   theme_bw()+
+  theme(plot.title = element_text(size = 12, face = "bold", hjust = 0.5))+
   theme(axis.title.y = element_text(face = "bold", size = 8), axis.title.x = element_text(face="bold", size = 8))+
   theme(axis.text.y = element_text(face = "bold", size = 8), axis.text.x = element_text(face="bold", size = 8))+
   theme(legend.position = "none") + 
   theme(legend.title=element_text(size= 8), legend.text = element_text(size = (8))) + 
   theme(axis.title = element_text(size = 10)) +
-  #facet_grid(~ Age)+
-  facet_grid(Age ~ .)+
-  theme(strip.background =element_rect(fill="White"))+
-  theme(strip.text = element_text(colour = 'Black', size = 8))+
   #stat_cor(aes(label = ..rr.label..), color = "black", geom = "label", size = 3)
-  stat_cor(aes(), color = "black", geom = "label", size = 2.5)
-
-
-#ggsave(plot = plotC, width = 6, height = 4, units = "in", dpi = 300,filename = "ScriptManuscript2/Figures/Alkyl_vs_Acyl_Correlation_plot_ENLDB.jpg")                
+  stat_cor(aes(), color = "black", geom = "label", size = 2.5, label.y = 0.635)+
+  scale_y_continuous(limits = c(0.00, 0.635, by = 0.20),labels = scales::number_format(accuracy = 0.001))+
+  scale_x_continuous(labels = scales::number_format(accuracy = 0.001))+
+  theme(axis.title.x=element_blank(), axis.title.y=element_blank())
 
 #____________________
 
-# 4. Make a correlation plot for mean DB in alkyl vs acyl chains in ELPLs.
+# Make a correlation plot for mean DB in alkyl vs acyl chains in ELPLs.
 
-ELPLChainDB <- read_excel("ScriptManuscript2/MainTables/AlkylAcylEPL_DB.xlsx") %>% 
+ELPLChainDB1 <- read_excel("data/data_plot/AlkylAcylEPL_DB.xlsx") %>% 
   dplyr::rename(Alkyl = "EPLs (akyl)") %>% 
-  dplyr::rename(Acyl = "EPLs (acyl)") 
+  dplyr::rename(Acyl = "EPLs (acyl)") %>% 
+  dplyr::filter(Age == "Day 1") 
 
 
 # make correlation plot 
 
-plotD <- ELPLChainDB %>% 
+plotELPLDB1 <- ELPLChainDB1 %>% 
+  dplyr::mutate(Alkyl = as.numeric(Alkyl)) %>% 
+  dplyr::mutate(Acyl = as.numeric(Acyl)) %>% 
+  dplyr::mutate(Strain = factor(as.factor(Strain), levels = c("CTnew","CTold", "SDnew","SDold","SDolder","CNnew","CNold"))) %>%
+  ggplot(aes(Acyl, Alkyl, colour = Strain))+
+  geom_point()+ 
+  geom_errorbar(aes(xmin=Acyl-acylSE, xmax=Acyl+acylSE,colour = Strain), width = 0.000001, size = 0.2, alpha = 1) +
+  geom_errorbar(aes(ymin=Alkyl-akylSE, ymax=Alkyl+akylSE,colour = Strain), width = 0.000001, size = 0.2, alpha = 1) +
+  geom_text_repel(aes(label = paste0(Strain)), size = 3, min.segment.length = 0, seed = 42, box.padding = 0.5) +
+  stat_smooth(method = "lm",col = "#C42126", se = FALSE,size = 0.5)+
+  labs(x= "Acyl chain double bonds EPL", y = "Alk(en)yl chain double bonds")+
+  ggtitle("Ether phospholipids") +
+  theme_bw()+
+  theme(plot.title = element_text(size = 12, face = "bold", hjust = 0.5))+
+  theme(axis.title.y = element_text(face = "bold", size = 8), axis.title.x = element_text(face="bold", size = 8))+
+  theme(axis.text.y = element_text(face = "bold", size = 8), axis.text.x = element_text(face="bold", size = 8))+
+  theme(legend.position = "none") + 
+  theme(legend.title=element_text(size= 8), legend.text = element_text(size = (8))) + 
+  theme(axis.title = element_text(size = 10)) +
+  stat_cor(aes(), color = "black", geom = "label", size = 2.5, label.y = 0.042, label.x = 1.726)+
+  scale_y_continuous(limits = c(0.020, 0.042, by = 0.025),labels = scales::number_format(accuracy = 0.001))+
+  scale_x_continuous(labels = scales::number_format(accuracy = 0.001))+
+  theme(axis.title.x=element_blank(), axis.title.y=element_blank())
+
+
+legend <- ELPLChainDB1 %>% 
+  dplyr::mutate(Alkyl = as.numeric(Alkyl)) %>% 
+  dplyr::mutate(Acyl = as.numeric(Acyl)) %>% 
+  dplyr::mutate(Strain = factor(as.factor(Strain), levels = c("CTnew","CTold", "SDnew","SDold","SDolder","CNnew","CNold"))) %>%
+  ggplot(aes(Acyl, Alkyl, colour = Strain))+
+  geom_point()+ 
+  geom_errorbar(aes(xmin=Acyl-acylSE, xmax=Acyl+acylSE,colour = Strain), width = 0.000001, size = 0.2, alpha = 1) +
+  geom_errorbar(aes(ymin=Alkyl-akylSE, ymax=Alkyl+akylSE,colour = Strain), width =0.000001, size = 0.2, alpha = 1) +
+  geom_text_repel(aes(label = paste0(Strain)), size = 3, min.segment.length = 0, seed = 42, box.padding = 0.5, max.overlaps = Inf) +
+  labs(x= "Acyl chain double bonds EPL", y = "Alkyl chain double bonds")+
+  ggtitle("Ether phospholipids") +
+  theme_bw()+
+  theme(plot.title = element_text(size = 12, face = "bold", hjust = 0.5))+
+  theme(axis.title.y = element_text(face = "bold", size = 8), axis.title.x = element_text(face="bold", size = 8))+
+  theme(axis.text.y = element_text(face = "bold", size = 8), axis.text.x = element_text(face="bold", size = 8))+
+  theme(legend.position = "bottom") + guides(colour=guide_legend(nrow=1))+
+  theme(legend.title=element_text(size= 8), legend.text = element_text(size = (8))) + 
+  theme(axis.title = element_text(size = 10)) +
+  stat_cor(aes(), color = "black", geom = "label", size = 2.5, label.y = 0.042)+
+  scale_y_continuous(limits = c(0.02, 0.042, by = 0.005),labels = scales::number_format(accuracy = 0.001))+
+  theme(axis.title.x=element_blank(), axis.title.y=element_blank())
+
+
+#Arrange and save the correlation plots for DB
+
+get_legend <- function(myggplot){
+  tmp <- ggplot_gtable(ggplot_build(myggplot))
+  leg <- which(sapply(tmp$grobs, function(x) x$name) == "guide-box")
+  legend <- tmp$grobs[[leg]]
+  return(legend)
+}
+
+legend <- get_legend(legend)
+
+#___
+#Arrange and save D1 plots 
+
+Plot1 <- ggarrange(plotELNLDB1,plotELPLDB1, ncol = 2)
+
+Plot1_annotated <- annotate_figure(Plot1,top = text_grob("Day 1", hjust = 0.5, face = "bold", size = 14))
+
+#______________________________________________________________________________________________________________
+
+
+#_______________________________Correlation plots for CC at Day 19______________________________________________
+
+# Make a correlation plot for mean DB in alkyl vs acyl chains in ELNLs.
+
+ELNLChainDB19 <- read_excel("data/data_plot/AlkylAcylENL_DB.xlsx") %>% 
+  dplyr::rename(Alkyl = "ENLs (akyl)") %>% 
+  dplyr::rename(Acyl = "ENLs (acyl)")  %>% 
+  dplyr::filter(Age == "Day 19")
+
+plotELNLDB19 <- ELNLChainDB19 %>% 
   dplyr::mutate(Alkyl = as.numeric(Alkyl)) %>% 
   dplyr::mutate(Acyl = as.numeric(Acyl)) %>% 
   dplyr::mutate(Strain = factor(as.factor(Strain), levels = c("CTnew","CTold", "SDnew","SDold","SDolder","CNnew","CNold"))) %>%
@@ -1046,29 +1365,81 @@ plotD <- ELPLChainDB %>%
   geom_point()+ 
   geom_errorbar(aes(xmin=Acyl-acylSE, xmax=Acyl+acylSE,colour = Strain), width = 0.001, size = 0.2, alpha = 1) +
   geom_errorbar(aes(ymin=Alkyl-akylSE, ymax=Alkyl+akylSE,colour = Strain), width = 0.001, size = 0.2, alpha = 1) +
-  geom_text_repel(aes(label = paste0(Strain)), size = 3, min.segment.length = 0, seed = 42, box.padding = 0.5, max.overlaps = Inf) +
-  #stat_smooth(method = "lm",col = "#C42126", se = FALSE,size = 0.5)+
-  labs(x= "Acyl chain double bonds EPL", y = "Alkyl chain double bonds")+
+  geom_text_repel(aes(label = paste0(Strain)), size = 3, min.segment.length = 0, seed = 42, box.padding = 0.5) +
+  stat_smooth(method = "lm",col = "#C42126", se = FALSE,size = 0.5)+
+  labs(x= "Acyl chain double bonds ENL", y = "Alkyl chain double bonds")+
+  ggtitle("Ether neutral lipids") +
   theme_bw()+
+  theme(plot.title = element_text(size = 12, face = "bold", hjust = 0.5))+
   theme(axis.title.y = element_text(face = "bold", size = 8), axis.title.x = element_text(face="bold", size = 8))+
   theme(axis.text.y = element_text(face = "bold", size = 8), axis.text.x = element_text(face="bold", size = 8))+
   theme(legend.position = "none") + 
   theme(legend.title=element_text(size= 8), legend.text = element_text(size = (8))) + 
   theme(axis.title = element_text(size = 10)) +
-  #facet_grid(~ Age)+
-  facet_grid(Age ~ .)+
-  theme(strip.background =element_rect(fill="White"))+
-  theme(strip.text = element_text(colour = 'Black', size = 8))+
-  #stat_cor(aes(label = ..rr.label..), color = "black", geom = "label", size = 3)
-  stat_cor(aes(), color = "black", geom = "label", size = 2.5)
+  stat_cor(aes(), color = "black", geom = "label", size = 2.5, label.y = 1.500)+
+  scale_y_continuous(limits = c(0.00, 1.500, by = 0.25),labels = scales::number_format(accuracy = 0.001))+
+  scale_x_continuous(labels = scales::number_format(accuracy = 0.001))+
+  theme(axis.title.x=element_blank(), axis.title.y=element_blank())
 
-#ggsave(plot = plotD, width = 6, height = 4, units = "in", dpi = 300,filename = "ScriptManuscript2/Figures/Alkyl_vs_Acyl_Correlation_plot_EPLDB.jpg")              
+#____________________
 
-FigureS2 <- grid.arrange(plotC, plotD, legend, ncol=2, nrow = 2, layout_matrix = rbind(c(1,2), c(3,3)),
-                         widths = c(2.7, 2.7), heights = c(2.5, 0.2))
+# Make a correlation plot for mean DB in alkyl vs acyl chains in ELPLs.
 
-# Save Figure S2
+ELPLChainDB19 <- read_excel("data/data_plot/AlkylAcylEPL_DB.xlsx") %>% 
+  dplyr::rename(Alkyl = "EPLs (akyl)") %>% 
+  dplyr::rename(Acyl = "EPLs (acyl)") %>% 
+  dplyr::filter(Age == "Day 19") 
 
-ggsave(plot = FigureS2, width =9, height = 6, units = "in", dpi = 300,filename = "Figures/FigureS2.jpg")              
 
-#________________________________________END_________________________________________
+# make correlation plot 
+
+plotELPLDB19 <- ELPLChainDB19 %>% 
+  dplyr::mutate(Alkyl = as.numeric(Alkyl)) %>% 
+  dplyr::mutate(Acyl = as.numeric(Acyl)) %>% 
+  dplyr::mutate(Strain = factor(as.factor(Strain), levels = c("CTnew","CTold", "SDnew","SDold","SDolder","CNnew","CNold"))) %>%
+  ggplot(aes(Acyl, Alkyl, colour = Strain))+
+  geom_point()+ 
+  geom_errorbar(aes(xmin=Acyl-acylSE, xmax=Acyl+acylSE,colour = Strain), width = 0.000001, size = 0.2, alpha = 1) +
+  geom_errorbar(aes(ymin=Alkyl-akylSE, ymax=Alkyl+akylSE,colour = Strain), width = 0.000001, size = 0.2, alpha = 1) +
+  geom_text_repel(aes(label = paste0(Strain)), size = 3, min.segment.length = 0, seed = 42, box.padding = 0.5) +
+  stat_smooth(method = "lm",col = "#C42126", se = FALSE,size = 0.5)+
+  labs(x= "Acyl chain double bonds EPL", y = "Alk(en)yl chain double bonds")+
+  ggtitle("Ether phospholipids") +
+  theme_bw()+
+  theme(plot.title = element_text(size = 12, face = "bold", hjust = 0.5))+
+  theme(axis.title.y = element_text(face = "bold", size = 8), axis.title.x = element_text(face="bold", size = 8))+
+  theme(axis.text.y = element_text(face = "bold", size = 8), axis.text.x = element_text(face="bold", size = 8))+
+  theme(legend.position = "none") + 
+  theme(legend.title=element_text(size= 8), legend.text = element_text(size = (8))) + 
+  theme(axis.title = element_text(size = 10)) +
+  stat_cor(aes(), color = "black", geom = "label", size = 2.5, label.y = 0.080)+
+  scale_y_continuous(limits = c(0.060, 0.080, by = 0.005),labels = scales::number_format(accuracy = 0.001))+
+  scale_x_continuous(labels = scales::number_format(accuracy = 0.001))+
+  theme(axis.title.x=element_blank(), axis.title.y=element_blank())
+
+#___
+#Arrange and save D19 plots 
+
+Plot2 <- ggarrange(plotELNLDB19,plotELPLDB19, ncol = 2)
+
+Plot2_annotated <- annotate_figure(Plot2, top = text_grob("Day 19", hjust = 0.5, face = "bold", size = 14))
+
+#___
+# Combine and save plot for D1 and D19 into one Figure
+
+Figure <- ggarrange(Plot1_annotated, Plot2_annotated, nrow = 2)
+
+Figure_annotated <- annotate_figure(Figure,
+                                    #top = text_grob("Day 1", hjust = 0.5, face = "bold", size = 14))
+                                    bottom = text_grob("Acyl chain(s)", hjust = 0.5, face = "bold", size = 12),
+                                    left = text_grob("Alk(en)yl chain", rot = 90, face = "bold", size = 12))
+
+
+Figure_arranged <- grid.arrange(Figure_annotated, legend, nrow = 2, layout_matrix = rbind(c(1,1), c(3,3)),
+                                widths = c(2.7, 2.7), heights = c(2.5, 0.2))
+
+
+ggsave(plot = Figure_arranged, width = 9.0, height = 6.0, units = "in", dpi = 300,filename = "Figures/FigureS2.jpg")              
+
+
+#________________________________________END________________________________________________
