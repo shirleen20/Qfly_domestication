@@ -161,12 +161,13 @@ legend <- get_legend(p1.Legend)
 Plot1 <- ggarrange(p1,p2, nrow = 2)
 
 Plot1_annotated <- annotate_figure(Plot1, bottom = text_grob("Lipid classes", hjust = 0.5, face = "bold", size = 12),
-                                   left = text_grob("Acyl/ Alk(en)yl chains", rot = 90, face = "bold", size = 12))
+                                   left = text_grob("Acyl/Alk(en)yl chains", rot = 90, face = "bold", size = 12))
 
 Figure1_arranged <- grid.arrange(Plot1_annotated, legend, nrow = 2, layout_matrix = rbind(c(1,1), c(3,3)),
                                  widths = c(2.7, 2.7), heights = c(2.7, 0.2))
 
 #ggsave(plot = Figure1_arranged, width = 9.0, height = 8.5, units = "in", dpi = 300,filename = "ScriptManuscript2/Commonchains/Common acyl chains CTnew & SDolder at D1.jpg")
+ggsave(plot = Figure1_arranged, width = 9.0, height = 8.5, units = "in", dpi = 300,filename = "Figures/Figure 7.jpg")
 
 #__________________________________D19 HEATMAP_______________________________________________
 
@@ -229,12 +230,13 @@ p4 <- SD0lderAbundance %>%
 Plot2 <- ggarrange(p3,p4, nrow = 2)
 
 Plot2_annotated <- annotate_figure(Plot2, bottom = text_grob("Lipid classes", hjust = 0.5, face = "bold", size = 12),
-                                   left = text_grob("Acyl/ Alk(en)yl chains", rot = 90, face = "bold", size = 12))
+                                   left = text_grob("Acyl/Alk(en)yl chains", rot = 90, face = "bold", size = 12))
 
 Figure2_arranged <- grid.arrange(Plot2_annotated, legend, nrow = 2, layout_matrix = rbind(c(1,1), c(3,3)),
                                  widths = c(2.7, 2.7), heights = c(2.7, 0.2))
 
-#ggsave(plot = Figure2_arranged, width = 9.0, height = 8.5, units = "in", dpi = 300,filename = "ScriptManuscript2/Commonchains/Common acyl chains CTnew & SDolder at D19.jpg")
+#ggsave(plot = Figure2_arranged, width = 9.0, height = 8.5, units = "in", dpi = 300,filename = "Figures/Figure S3 Common acyl chains CTnew & SDolder at D19.jpg")
+ggsave(plot = Figure2_arranged, width = 9.0, height = 8.5, units = "in", dpi = 300,filename = "Figures/Figure S3.jpg")
 
 #______________________________________END_______________________________________
 
