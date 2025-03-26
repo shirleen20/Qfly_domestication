@@ -1,7 +1,7 @@
 #_________________________________________24/01/2025____________________________________
 
 # Here we make correlation plots for double bond contents in alkyl and acyl chains of ether lipids
-# We use this analysis to generate Figure S2
+# We use this analysis to generate Figure S4
 
 library("tidyverse")
 library("ggrepel")

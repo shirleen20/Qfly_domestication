@@ -1,7 +1,7 @@
 #_________________________________________24/01/2025____________________________________
 
 # Here we make correlation plots for carbon contents in alkyl and acyl chains of ether lipids
-# We use this analysis to generate Figure 6
+# We use this analysis to generate Figure 7
 
 library("tidyverse")
 library("ggrepel")

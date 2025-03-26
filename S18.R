@@ -2,7 +2,7 @@
 
 # Heatmaps of frequencies (%) of abundant acyl and alk(en)yl chains in two strains CTnew and 
 # SDolder and classes TG, PE, TGe, PEe, PEp at Day 1 and Day 19
-# We use this analysis to generate Figure 7 and Figure S3.
+# We use this analysis to generate Figures 6, S2 and S3.
 
 library("tidyverse")
 library("ggplot2")
@@ -15,7 +15,7 @@ library("grid")
 #____________________________Plot heat mapsfor Age D1____________________________________
 
 
-# 1. CTnew heatmap_________
+# 1. CTnew D1 heatmap
 
 rm(list=ls())
 
@@ -98,7 +98,7 @@ p1.Legend <- CTnewAbundance %>%
   theme(plot.title = element_text(face = "bold", hjust = 0.5, size = (12))) + theme(axis.title = element_text(size = 8))+
   theme(axis.text.x=element_blank(), axis.title.x=element_blank(), axis.title.y=element_blank())
 
-#__________ SDolder heatmap_________
+#__________ SDolder D1 heatmap_________
 
 SD0lderAbundance <- as.data.frame(read_csv("data/data_plot/SD0lder_commonacylchains.csv")) %>% 
   dplyr::mutate(Age = paste0(Age, " Day")) %>% 
@@ -146,8 +146,10 @@ p2 <- SD0lderAbundance %>%
   #theme(axis.text.x=element_blank()
   theme(axis.title.x=element_blank(), axis.title.y=element_blank())
 
+
+
 #___
-#Arrange and save D1 plots 
+#Arrange and save D1 plots only for CTnew and SDolder to make Figure 6
 
 get_legend<-function(myggplot){
   tmp <- ggplot_gtable(ggplot_build(myggplot))
@@ -169,9 +171,12 @@ Figure1_arranged <- grid.arrange(Plot1_annotated, legend, nrow = 2, layout_matri
 #ggsave(plot = Figure1_arranged, width = 9.0, height = 8.5, units = "in", dpi = 300,filename = "ScriptManuscript2/Commonchains/Common acyl chains CTnew & SDolder at D1.jpg")
 ggsave(plot = Figure1_arranged, width = 9.0, height = 8.5, units = "in", dpi = 300,filename = "Figures/Figure 7.jpg")
 
-#__________________________________D19 HEATMAP_______________________________________________
 
-p3 <- CTnewAbundance %>%
+#_____________________________________________________________________________________________
+
+#__________________________D19 HEATMAP ALL STRAINS____________________________________________
+
+pp3 <- CTnewAbundance %>%
   dplyr::filter(AcylChain %in% c("19 Day_TG","19 Day_TG e", "19 Day_TG e_ether", 
                                  "19 Day_PE", "19 Day_PE e", "19 Day_PE e_ether", 
                                  "19 Day_PE p", "19 Day_PE p_vinylether"))%>% 
