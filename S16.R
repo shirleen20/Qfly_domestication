@@ -371,6 +371,6 @@ Figure_arranged <- grid.arrange(Figure_annotated, legend, nrow = 2, layout_matri
 
 
 
-#ggsave(plot = Figure_arranged, width = 9.0, height = 6.0, units = "in", dpi = 300,filename = "ScriptManuscript2/Figures/Alkyl_vs_Acyl_CC_Correlation_plot_ELs.jpg")              
+ggsave(plot = Figure_arranged, width = 9.0, height = 6.0, units = "in", dpi = 300,filename = "Figures/Figure 7.jpg")              
 
 #________________________________________END________________________________________________
