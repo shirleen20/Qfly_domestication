@@ -522,8 +522,7 @@ P3 <- SDnewAbundance %>%
   theme(axis.text.y = element_text(size = 12), axis.text.x = element_text(size = 12)) + 
   theme(legend.position="none") +
   theme(plot.title = element_text(face = "bold", hjust = 0.5, size = (12))) + theme(axis.title = element_text(size = 8))+
-  #theme(axis.text.x=element_blank()
-  theme(axis.title.x=element_blank(), axis.title.y=element_blank())
+  theme(axis.text.x=element_blank(), axis.title.x=element_blank(), axis.title.y=element_blank())
 
 P4 <- SDoldAbundance %>%
   dplyr::filter(AcylChain %in% c("19 Day_TG","19 Day_TG e", "19 Day_TG e_ether", 
@@ -607,8 +606,7 @@ P6 <- CNnewAbundance %>%
   theme(axis.text.y = element_text(size = 12), axis.text.x = element_text(size = 12)) + 
   theme(legend.position="none") +
   theme(plot.title = element_text(face = "bold", hjust = 0.5, size = (12))) + theme(axis.title = element_text(size = 8))+
-  #theme(axis.text.x=element_blank()
-  theme(axis.title.x=element_blank(), axis.title.y=element_blank())
+  theme(axis.text.x=element_blank(), axis.title.x=element_blank(), axis.title.y=element_blank())
 
 P7 <- CNoldAbundance %>%
   dplyr::filter(AcylChain %in% c("19 Day_TG","19 Day_TG e", "19 Day_TG e_ether", 
@@ -635,8 +633,7 @@ P7 <- CNoldAbundance %>%
   theme(axis.text.y = element_text(size = 12), axis.text.x = element_text(size = 12)) + 
   theme(legend.position="none") +
   theme(plot.title = element_text(face = "bold", hjust = 0.5, size = (12))) + theme(axis.title = element_text(size = 8))+
-  #theme(axis.text.x=element_blank()
-  theme(axis.title.x=element_blank(), axis.title.y=element_blank())
+  theme(axis.text.x=element_blank(), axis.title.x=element_blank(), axis.title.y=element_blank())
 
 #_______________
 
