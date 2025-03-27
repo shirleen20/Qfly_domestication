@@ -2,7 +2,7 @@
 
 # Here we calculate diversities, abundances, mean Carbon and mean double bond content
 # in the seven strains to generate Figure 1, Table S3-S6 and we make correlation plots
-# to generate Figure 6 and Figure S2
+# to generate Figure 6 and Figure S4
 
 library("tidyverse")
 library("ggrepel")
@@ -1439,7 +1439,7 @@ Figure_arranged <- grid.arrange(Figure_annotated, legend, nrow = 2, layout_matri
                                 widths = c(2.7, 2.7), heights = c(2.5, 0.2))
 
 
-ggsave(plot = Figure_arranged, width = 9.0, height = 6.0, units = "in", dpi = 300,filename = "Figures/FigureS2.jpg")              
+ggsave(plot = Figure_arranged, width = 9.0, height = 6.0, units = "in", dpi = 300,filename = "Figures/Figure S4.jpg")              
 
 
 #________________________________________END________________________________________________
